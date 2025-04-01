@@ -24,6 +24,14 @@ public class AuthFilter extends OncePerRequestFilter {
     private final JwtUtils jwtUtils;
     private final CustomUserDetailsService customUserDetailsService;
 
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+        return path.startsWith("/swagger-ui") || 
+               path.startsWith("/v3/api-docs") || 
+               path.equals("/swagger-ui.html") ||
+               path.equals("/v3/api-docs.yaml");
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -51,7 +59,6 @@ public class AuthFilter extends OncePerRequestFilter {
         } catch (Exception e) {
             log.error("Exception occurred in AuthFilter: " + e.getMessage());
         }
-
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {
