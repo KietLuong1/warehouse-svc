@@ -7,8 +7,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -25,7 +27,7 @@ public class AuthFilter extends OncePerRequestFilter {
     private final CustomUserDetailsService customUserDetailsService;
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+    protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
         return path.startsWith("/swagger-ui") || 
                path.startsWith("/v3/api-docs") || 
@@ -37,35 +39,45 @@ public class AuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        String token = getTokenFromRequest(request);
+        final String authHeader = request.getHeader("Authorization");
+        final String jwt;
+        final String userEmail;
 
-        if (token != null) {
-            String email = jwtUtils.getUsernameFromToken(token);
-            UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+        if (StringUtils.isEmpty(authHeader) || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-            if (StringUtils.hasText(email) && jwtUtils.isTokeValid(token, userDetails)) {
-                log.info("Valid Token, {}", email);
+        jwt = authHeader.substring(7);
+        userEmail = jwtUtils.getUsernameFromToken(jwt);
 
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities()
-                );
-                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+        if (StringUtils.hasText(userEmail) && SecurityContextHolder.getContext().getAuthentication() == null) {
+            try {
+                UserDetails userDetails = customUserDetailsService.loadUserByUsername(userEmail);
+
+                if (jwtUtils.isTokenValid(jwt, userDetails)) {
+                    log.debug("Valid token for user: {}", userEmail);
+
+                    SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities()
+                    );
+
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    securityContext.setAuthentication(authToken);
+                    SecurityContextHolder.setContext(securityContext);
+                } else {
+                    log.debug("Invalid token for user: {}", userEmail);
+                }
+            } catch (UsernameNotFoundException e) {
+                log.debug("User not found: {}", userEmail);
+            } catch (Exception e) {
+                log.error("Authentication error: {}", e.getMessage());
             }
         }
 
-        try {
-            filterChain.doFilter(request, response);
-        } catch (Exception e) {
-            log.error("Exception occurred in AuthFilter: " + e.getMessage());
-        }
-    }
-
-    private String getTokenFromRequest(HttpServletRequest request) {
-        String token = request.getHeader("Authorization");
-        if (token != null && token.startsWith("Bearer ")) {
-            return token.substring(7);
-        }
-        return null;
+        filterChain.doFilter(request, response);
     }
 }

@@ -39,8 +39,6 @@ public class SecurityConfig {
                         .authenticationEntryPoint(customAuthenticationEntryPoint)
                 )
                 .authorizeHttpRequests(request -> request
-                        // Public endpoints
-                        .requestMatchers("/api/auth/**").permitAll()
                         // Make Swagger UI and API documentation completely public for debugging
                         .requestMatchers("/swagger-ui.html").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()

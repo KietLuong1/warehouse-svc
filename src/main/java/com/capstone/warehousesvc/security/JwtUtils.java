@@ -2,15 +2,14 @@ package com.capstone.warehousesvc.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.util.Date;
 import java.util.function.Function;
 
@@ -18,30 +17,13 @@ import java.util.function.Function;
 @Slf4j
 public class JwtUtils {
 
-    private static final long EXPIRATION_TIME_IN_MILLISEC = 1000L * 60L * 60L * 24L * 30L * 6L; //expires in 6 months in milleces
-    private SecretKey key;
-
-    @Value("${secreteJwtString:defaultSecretKeyForDevelopmentOnlyDontUseInProduction}")
-    private String secreteJwtString;
+    private Key key;
 
     @PostConstruct
     private void init() {
-        // Use a default secret if the provided one is empty
-        if (secreteJwtString == null || secreteJwtString.isEmpty() || secreteJwtString.equals("''")) {
-            secreteJwtString = "defaultSecretKeyForDevelopmentOnlyDontUseInProduction";
-            log.warn("Using default JWT secret key. This should be changed in production!");
-        }
-        byte[] keyBytes = secreteJwtString.getBytes(StandardCharsets.UTF_8);
-        this.key = new SecretKeySpec(keyBytes, "HmacSHA256");
-    }
-
-    public String generateToken(String email) {
-        return Jwts.builder()
-                .subject(email)
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME_IN_MILLISEC))
-                .signWith(key)
-                .compact();
+        byte[] keyBytes = Decoders.BASE64.decode("BF7FD11ACE545745B7BA1AF98B6F156D127BC7BB544BAB6A4FD74E4FC7");
+        this.key = Keys.hmacShaKeyFor(keyBytes);
+        log.info("JWT validation key initialized for tokens from loginservice");
     }
 
     public String getUsernameFromToken(String token) {
@@ -50,19 +32,24 @@ public class JwtUtils {
 
     private <T> T extractClaims(String token, Function<Claims, T> claimsTFunction) {
         try {
-            return claimsTFunction.apply(Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload());
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            return claimsTFunction.apply(claims);
         } catch (Exception e) {
             log.error("Error extracting claims from token: {}", e.getMessage());
             return null;
         }
     }
 
-    public boolean isTokeValid(String token, UserDetails userDetails) {
+    public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = getUsernameFromToken(token);
-        return (username != null && username.equals(userDetails.getUsername()) && !isTokeExpired(token));
+        return (username != null && username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
-    private boolean isTokeExpired(String token) {
+    private boolean isTokenExpired(String token) {
         Date expirationDate = extractClaims(token, Claims::getExpiration);
         return expirationDate != null && expirationDate.before(new Date());
     }
