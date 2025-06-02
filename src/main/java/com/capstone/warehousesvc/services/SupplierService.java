@@ -7,12 +7,12 @@ public interface SupplierService {
 
     Response addSupplier(SupplierDTO supplierDTO);
 
-    Response updateSupplier(Long id, SupplierDTO supplierDTO);
+    Response updateSupplier(String id, SupplierDTO supplierDTO);
 
     Response getAllSupplier();
 
-    Response getSupplierById(Long id);
+    Response getSupplierById(String id);
 
-    Response deleteSupplier(Long id);
+    Response deleteSupplier(String id);
 
 }

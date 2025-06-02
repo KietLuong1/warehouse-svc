@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name = "warehouses")
@@ -16,35 +15,35 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Warehouse {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
-    
+    private String id;
+
     @Column(nullable = false, unique = true)
     private String name;
-    
+
     @Column(nullable = false)
     private String location;
-    
+
     @Column(nullable = false)
     private Double capacity;
-    
+
     @Column(nullable = false)
     private Boolean active = true;
-    
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
-    
+
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-    
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
-    
+
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();

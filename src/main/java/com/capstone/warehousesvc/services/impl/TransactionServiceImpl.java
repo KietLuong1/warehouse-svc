@@ -51,22 +51,21 @@ public class TransactionServiceImpl implements TransactionService {
     private Object[] getCurrentUserInfo() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
-            if (authentication.getPrincipal() instanceof AuthUser) {
-                AuthUser authUser = (AuthUser) authentication.getPrincipal();
-                return new Object[]{authUser.getId(), authUser.getName()};
+            if (authentication.getPrincipal() instanceof AuthUser authUser) {
+                return new Object[]{String.valueOf(authUser.getId()), authUser.getName()};
             } else {
                 // For cases where we might have a different principal type
-                return new Object[]{0L, authentication.getName()};
+                return new Object[]{"0", authentication.getName()};
             }
         }
-        return new Object[]{0L, "system"};
+        return new Object[]{"0", "system"};
     }
 
     @Override
     public Response purchase(TransactionRequest transactionRequest) {
 
-        Long productId = transactionRequest.getProductId();
-        Long supplierId = transactionRequest.getSupplierId();
+        String productId = transactionRequest.getProductId();
+        String supplierId = transactionRequest.getSupplierId();
         Integer quantity = transactionRequest.getQuantity();
 
         if (supplierId == null) throw new NameValueRequiredException("Supplier Id is Required");
@@ -79,7 +78,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         // Get user info from security context
         Object[] userInfo = getCurrentUserInfo();
-        Long userId = (Long) userInfo[0];
+        String userId = (String) userInfo[0];
         String username = (String) userInfo[1];
 
         //update the stock quantity and re-save
@@ -111,7 +110,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Response sell(TransactionRequest transactionRequest) {
 
-        Long productId = transactionRequest.getProductId();
+        String productId = transactionRequest.getProductId();
         Integer quantity = transactionRequest.getQuantity();
 
         Product product = productRepository.findById(productId)
@@ -119,7 +118,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         // Get user info from security context
         Object[] userInfo = getCurrentUserInfo();
-        Long userId = (Long) userInfo[0];
+        String userId = (String) userInfo[0];
         String username = (String) userInfo[1];
 
         //update the stock quantity and re-save
@@ -152,8 +151,8 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Response returnToSupplier(TransactionRequest transactionRequest) {
 
-        Long productId = transactionRequest.getProductId();
-        Long supplierId = transactionRequest.getSupplierId();
+        String productId = transactionRequest.getProductId();
+        String supplierId = transactionRequest.getSupplierId();
         Integer quantity = transactionRequest.getQuantity();
 
         if (supplierId == null) throw new NameValueRequiredException("Supplier Id is Required");
@@ -161,12 +160,9 @@ public class TransactionServiceImpl implements TransactionService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException("Product Not Found"));
 
-        Supplier supplier = supplierRepository.findById(supplierId)
-                .orElseThrow(() -> new NotFoundException("Supplier Not Found"));
-
         // Get user info from security context
         Object[] userInfo = getCurrentUserInfo();
-        Long userId = (Long) userInfo[0];
+        String userId = (String) userInfo[0];
         String username = (String) userInfo[1];
 
         //update the stock quantity and re-save
@@ -225,7 +221,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Response getAllTransactionById(Long id) {
+    public Response getAllTransactionById(String id) {
 
         Transaction transaction = transactionRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Transaction Not Found"));
@@ -263,7 +259,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Response updateTransactionStatus(Long transactionId, TransactionStatus status) {
+    public Response updateTransactionStatus(String transactionId, TransactionStatus status) {
 
         Transaction existingTransaction = transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new NotFoundException("Transaction Not Found"));

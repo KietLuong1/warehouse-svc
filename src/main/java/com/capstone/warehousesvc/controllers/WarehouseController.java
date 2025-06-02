@@ -16,7 +16,7 @@ import java.util.Map;
 
 @Tag(name = "Warehouse", description = "Warehouse location management")
 @RestController
-@RequestMapping("/api/warehouses")
+@RequestMapping("/api/v1/warehouses")
 @RequiredArgsConstructor
 public class WarehouseController {
     
@@ -41,7 +41,7 @@ public class WarehouseController {
     
     @Operation(summary = "Get inventory by location")
     @GetMapping("/{id}/inventory")
-    public ResponseEntity<Response> getLocationInventory(@PathVariable Long id) {
+    public ResponseEntity<Response> getLocationInventory(@PathVariable String id) {
         Map<String, Object> data = new HashMap<>();
         data.put("inventory", warehouseService.getWarehouseInventory(id));
         
@@ -86,39 +86,39 @@ public class WarehouseController {
     
     @Operation(summary = "Get warehouse by ID")
     @GetMapping("/{id}")
-    public ResponseEntity<Response> getWarehouse(@PathVariable Long id) {
+    public ResponseEntity<Response> getWarehouse(@PathVariable String id) {
         Map<String, Object> data = new HashMap<>();
         data.put("warehouse", warehouseService.getWarehouse(id));
-        
+
         Response response = Response.builder()
                 .status(HttpStatus.OK.value())
                 .message("Warehouse retrieved successfully")
                 .data(data)
                 .build();
-        
+
         return ResponseEntity.ok(response);
     }
-    
+
     @Operation(summary = "Update warehouse")
     @PutMapping("/{id}")
-    public ResponseEntity<Response> updateWarehouse(@PathVariable Long id, @Valid @RequestBody WarehouseDTO dto) {
+    public ResponseEntity<Response> updateWarehouse(@PathVariable String id, @Valid @RequestBody WarehouseDTO dto) {
         WarehouseDTO updatedWarehouse = warehouseService.updateWarehouse(id, dto);
-        
+
         Map<String, Object> data = new HashMap<>();
         data.put("warehouse", updatedWarehouse);
-        
+
         Response response = Response.builder()
                 .status(HttpStatus.OK.value())
                 .message("Warehouse updated successfully")
                 .data(data)
                 .build();
-        
+
         return ResponseEntity.ok(response);
     }
-    
+
     @Operation(summary = "Delete warehouse")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Response> deleteWarehouse(@PathVariable Long id) {
+    public ResponseEntity<Response> deleteWarehouse(@PathVariable String id) {
         warehouseService.deleteWarehouse(id);
         
         Response response = Response.builder()

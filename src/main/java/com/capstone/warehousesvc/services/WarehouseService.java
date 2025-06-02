@@ -9,15 +9,15 @@ public interface WarehouseService {
     
     WarehouseDTO createWarehouse(WarehouseDTO warehouseDTO);
     
-    WarehouseDTO getWarehouse(Long id);
-    
+    WarehouseDTO getWarehouse(String id);
+
     List<WarehouseDTO> getAllWarehouses();
-    
+
     List<WarehouseDTO> getActiveWarehouses();
-    
-    WarehouseDTO updateWarehouse(Long id, WarehouseDTO warehouseDTO);
-    
-    void deleteWarehouse(Long id);
-    
-    List<ProductDTO> getWarehouseInventory(Long warehouseId);
+
+    WarehouseDTO updateWarehouse(String id, WarehouseDTO warehouseDTO);
+
+    void deleteWarehouse(String id);
+
+    List<ProductDTO> getWarehouseInventory(String warehouseId);
 }

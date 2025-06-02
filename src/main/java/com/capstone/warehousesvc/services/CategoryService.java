@@ -3,17 +3,15 @@ package com.capstone.warehousesvc.services;
 import com.capstone.warehousesvc.dtos.CategoryDTO;
 import com.capstone.warehousesvc.dtos.Response;
 
-import java.util.UUID;
-
 public interface CategoryService {
 
     Response createCategory(CategoryDTO categoryDTO);
 
     Response getAllCategories();
 
-    Response getCategoryById(UUID id);
+    Response getCategoryById(String id);
 
-    Response updateCategory(UUID id, CategoryDTO categoryDTO);
+    Response updateCategory(String id, CategoryDTO categoryDTO);
 
-    Response deleteCategory(UUID id);
+    Response deleteCategory(String id);
 }

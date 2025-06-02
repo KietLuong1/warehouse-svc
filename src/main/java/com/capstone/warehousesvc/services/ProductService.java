@@ -11,9 +11,9 @@ public interface ProductService {
 
     Response getAllProducts();
 
-    Response getProductById(Long id);
+    Response getProductById(String id);
 
-    Response deleteProduct(Long id);
+    Response deleteProduct(String id);
 
     Response searchProduct(String input);
 }
