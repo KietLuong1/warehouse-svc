@@ -40,7 +40,7 @@ public class TransactionController {
 
     @Operation(summary = "Get all transactions", description = "Get paginated list of transactions with optional filtering")
     @GetMapping("/all")
-    public ResponseEntity<Response> getAllTransactions(
+    public ResponseEntity<?> getAllTransactions(
             @Parameter(description = "Page number (zero-based)") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size") @RequestParam(defaultValue = "1000") int size,
             @Parameter(description = "Filter criteria") @RequestParam(required = false) String filter) {
@@ -56,10 +56,12 @@ public class TransactionController {
     @Operation(summary = "Get transactions by month/year", 
                description = "Filter transactions by month and year")
     @GetMapping("/by-month-year")
-    public ResponseEntity<Response> getTransactionByMonthAndYear(
+    public ResponseEntity<?> getTransactionByMonthAndYear(
             @Parameter(name = "month", description = "Month (1-12)", example = "3") @RequestParam int month,
-            @Parameter(name = "year", description = "Year (4 digits)", example = "2024") @RequestParam int year) {
-        return ResponseEntity.ok(transactionService.getAllTransactionByMonthAndYear(month, year));
+            @Parameter(name = "year", description = "Year (4 digits)", example = "2024") @RequestParam int year,
+            @Parameter(description = "Page number (zero-based)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(transactionService.getAllTransactionByMonthAndYear(month, year, page, size));
     }
 
     @Operation(summary = "Update transaction status", description = "Update the status of an existing transaction")

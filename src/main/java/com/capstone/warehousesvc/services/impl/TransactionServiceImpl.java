@@ -4,6 +4,7 @@ package com.capstone.warehousesvc.services.impl;
 import com.capstone.warehousesvc.dtos.Response;
 import com.capstone.warehousesvc.dtos.TransactionDTO;
 import com.capstone.warehousesvc.dtos.TransactionRequest;
+import com.capstone.warehousesvc.dtos.response.PagedResponse;
 import com.capstone.warehousesvc.enums.TransactionStatus;
 import com.capstone.warehousesvc.enums.TransactionType;
 import com.capstone.warehousesvc.exceptions.NameValueRequiredException;
@@ -193,7 +194,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Response getAllTransactions(int page, int size, String filter) {
+    public PagedResponse<TransactionDTO> getAllTransactions(int page, int size, String filter) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
 
@@ -210,14 +211,14 @@ public class TransactionServiceImpl implements TransactionService {
             transactionDTO.setSupplier(null);
         });
 
-        return Response.builder()
-                .status(200)
-                .message("success")
-                .transactions(transactionDTOS)
-                .totalElements(transactionPage.getTotalElements())
-                .totalPages(transactionPage.getTotalPages())
-                .build();
-
+        return new PagedResponse<>(
+                transactionDTOS,
+                page,
+                size,
+                transactionPage.getTotalElements(),
+                transactionPage.getTotalPages(),
+                transactionPage.isLast()
+        );
     }
 
     @Override
@@ -239,10 +240,12 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Response getAllTransactionByMonthAndYear(int month, int year) {
-        List<Transaction> transactions = transactionRepository.findAll(TransactionFilter.byMonthAndYear(month, year));
+    public PagedResponse<TransactionDTO> getAllTransactionByMonthAndYear(int month, int year, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+        Specification<Transaction> spec = TransactionFilter.byMonthAndYear(month, year);
+        Page<Transaction> transactionPage = transactionRepository.findAll(spec, pageable);
 
-        List<TransactionDTO> transactionDTOS = modelMapper.map(transactions, new TypeToken<List<TransactionDTO>>() {
+        List<TransactionDTO> transactionDTOS = modelMapper.map(transactionPage.getContent(), new TypeToken<List<TransactionDTO>>() {
         }.getType());
 
         transactionDTOS.forEach(transactionDTO -> {
@@ -251,11 +254,14 @@ public class TransactionServiceImpl implements TransactionService {
             transactionDTO.setSupplier(null);
         });
 
-        return Response.builder()
-                .status(200)
-                .message("success")
-                .transactions(transactionDTOS)
-                .build();
+        return new PagedResponse<>(
+                transactionDTOS,
+                page,
+                size,
+                transactionPage.getTotalElements(),
+                transactionPage.getTotalPages(),
+                transactionPage.isLast()
+        );
     }
 
     @Override

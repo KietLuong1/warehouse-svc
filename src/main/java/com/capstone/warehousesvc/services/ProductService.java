@@ -2,6 +2,7 @@ package com.capstone.warehousesvc.services;
 
 import com.capstone.warehousesvc.dtos.ProductDTO;
 import com.capstone.warehousesvc.dtos.Response;
+import com.capstone.warehousesvc.dtos.response.PagedResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface ProductService {
@@ -9,11 +10,11 @@ public interface ProductService {
 
     Response updateProduct(ProductDTO productDTO, MultipartFile imageFile);
 
-    Response getAllProducts();
+    PagedResponse<ProductDTO> getAllProducts(int page, int size);
 
     Response getProductById(String id);
 
     Response deleteProduct(String id);
 
-    Response searchProduct(String input);
+    PagedResponse<ProductDTO> searchProduct(String input, int page, int size);
 }

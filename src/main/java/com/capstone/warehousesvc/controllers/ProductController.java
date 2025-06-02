@@ -51,8 +51,10 @@ public class ProductController {
 
     @Operation(summary = "Get all products")
     @GetMapping("/all")
-    public ResponseEntity<Response> getAllProducts() {
-        return ResponseEntity.ok(productService.getAllProducts());
+    public ResponseEntity<?> getAllProducts(
+            @Parameter(description = "Page number (zero-based)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(productService.getAllProducts(page, size));
     }
 
     @Operation(summary = "Get product by ID")
@@ -63,8 +65,11 @@ public class ProductController {
 
     @Operation(summary = "Search products", description = "Search products by name or SKU")
     @GetMapping("/search")
-    public ResponseEntity<Response> searchProduct(@Parameter(description = "Search term") @RequestParam String search) {
-        return ResponseEntity.ok(productService.searchProduct(search));
+    public ResponseEntity<?> searchProduct(
+            @Parameter(description = "Search term") @RequestParam String search,
+            @Parameter(description = "Page number (zero-based)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(productService.searchProduct(search, page, size));
     }
 
     @Operation(summary = "Update product", description = "Update an existing product (Admin only)")

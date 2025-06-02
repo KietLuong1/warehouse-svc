@@ -1,7 +1,9 @@
 package com.capstone.warehousesvc.services;
 
 import com.capstone.warehousesvc.dtos.Response;
+import com.capstone.warehousesvc.dtos.TransactionDTO;
 import com.capstone.warehousesvc.dtos.TransactionRequest;
+import com.capstone.warehousesvc.dtos.response.PagedResponse;
 import com.capstone.warehousesvc.enums.TransactionStatus;
 
 public interface TransactionService {
@@ -11,11 +13,11 @@ public interface TransactionService {
 
     Response returnToSupplier(TransactionRequest transactionRequest);
 
-    Response getAllTransactions(int page, int size, String filter);
+    PagedResponse<TransactionDTO> getAllTransactions(int page, int size, String filter);
 
     Response getAllTransactionById(String id);
 
-    Response getAllTransactionByMonthAndYear(int month, int year);
+    PagedResponse<TransactionDTO> getAllTransactionByMonthAndYear(int month, int year, int page, int size);
 
     Response updateTransactionStatus(String transactionId, TransactionStatus status);
 }

@@ -5,6 +5,7 @@ import com.capstone.warehousesvc.dtos.CategoryDTO;
 import com.capstone.warehousesvc.dtos.Response;
 import com.capstone.warehousesvc.services.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +31,10 @@ public class CategoryController {
 
     @Operation(summary = "Get all categories")
     @GetMapping("/all")
-    public ResponseEntity<Response> getAllCategories() {
-        return ResponseEntity.ok(categoryService.getAllCategories());
+    public ResponseEntity<?> getAllCategories(
+            @Parameter(description = "Page number (zero-based)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(categoryService.getAllCategories(page, size));
     }
 
     @Operation(summary = "Get category by ID")

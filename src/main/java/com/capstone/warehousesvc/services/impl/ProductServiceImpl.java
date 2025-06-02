@@ -3,6 +3,7 @@ package com.capstone.warehousesvc.services.impl;
 
 import com.capstone.warehousesvc.dtos.ProductDTO;
 import com.capstone.warehousesvc.dtos.Response;
+import com.capstone.warehousesvc.dtos.response.PagedResponse;
 import com.capstone.warehousesvc.exceptions.NotFoundException;
 import com.capstone.warehousesvc.models.Category;
 import com.capstone.warehousesvc.models.Product;
@@ -13,6 +14,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -124,18 +128,21 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Response getAllProducts() {
+    public PagedResponse<ProductDTO> getAllProducts(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+        Page<Product> productPage = productRepository.findAll(pageable);
 
-        List<Product> productList = productRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
-
-        List<ProductDTO> productDTOList = modelMapper.map(productList, new TypeToken<List<ProductDTO>>() {
+        List<ProductDTO> productDTOList = modelMapper.map(productPage.getContent(), new TypeToken<List<ProductDTO>>() {
         }.getType());
 
-        return Response.builder()
-                .status(200)
-                .message("success")
-                .products(productDTOList)
-                .build();
+        return new PagedResponse<>(
+                productDTOList,
+                page,
+                size,
+                productPage.getTotalElements(),
+                productPage.getTotalPages(),
+                productPage.isLast()
+        );
     }
 
     @Override
@@ -166,22 +173,25 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Response searchProduct(String input) {
+    public PagedResponse<ProductDTO> searchProduct(String input, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+        Page<Product> productPage = productRepository.findByNameContainingOrDescriptionContaining(input, input, pageable);
 
-        List<Product> products = productRepository.findByNameContainingOrDescriptionContaining(input, input);
-
-        if (products.isEmpty()) {
+        if (productPage.isEmpty()) {
             throw new NotFoundException("Product Not Found");
         }
 
-        List<ProductDTO> productDTOList = modelMapper.map(products, new TypeToken<List<ProductDTO>>() {
+        List<ProductDTO> productDTOList = modelMapper.map(productPage.getContent(), new TypeToken<List<ProductDTO>>() {
         }.getType());
 
-        return Response.builder()
-                .status(200)
-                .message("success")
-                .products(productDTOList)
-                .build();
+        return new PagedResponse<>(
+                productDTOList,
+                page,
+                size,
+                productPage.getTotalElements(),
+                productPage.getTotalPages(),
+                productPage.isLast()
+        );
     }
 
     //This saved image to the public folder in your frontend

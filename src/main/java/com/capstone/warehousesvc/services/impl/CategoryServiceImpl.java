@@ -3,6 +3,7 @@ package com.capstone.warehousesvc.services.impl;
 
 import com.capstone.warehousesvc.dtos.CategoryDTO;
 import com.capstone.warehousesvc.dtos.Response;
+import com.capstone.warehousesvc.dtos.response.PagedResponse;
 import com.capstone.warehousesvc.exceptions.NotFoundException;
 import com.capstone.warehousesvc.models.Category;
 import com.capstone.warehousesvc.repositories.CategoryRepository;
@@ -11,6 +12,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -40,19 +44,23 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Response getAllCategories() {
-        List<Category> categories = categoryRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
+    public PagedResponse<CategoryDTO> getAllCategories(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+        Page<Category> categoryPage = categoryRepository.findAll(pageable);
 
-        categories.forEach(category -> category.setProducts(null));
+        categoryPage.getContent().forEach(category -> category.setProducts(null));
 
-        List<CategoryDTO> categoryDTOList = modelMapper.map(categories, new TypeToken<List<CategoryDTO>>() {
+        List<CategoryDTO> categoryDTOList = modelMapper.map(categoryPage.getContent(), new TypeToken<List<CategoryDTO>>() {
         }.getType());
 
-        return Response.builder()
-                .status(200)
-                .message("success")
-                .categories(categoryDTOList)
-                .build();
+        return new PagedResponse<>(
+                categoryDTOList,
+                page,
+                size,
+                categoryPage.getTotalElements(),
+                categoryPage.getTotalPages(),
+                categoryPage.isLast()
+        );
     }
 
     @Override
