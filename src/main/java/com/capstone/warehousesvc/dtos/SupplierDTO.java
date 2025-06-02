@@ -16,8 +16,8 @@ import lombok.NoArgsConstructor;
 @Schema(description = "Supplier details")
 public class SupplierDTO {
 
-    @Schema(description = "Supplier ID", example = "1")
-    private Long id;
+    @Schema(description = "Supplier ID", example = "123e4567-e89b-12d3-a456-426614174000")
+    private String id;
 
     @Schema(description = "Supplier name", example = "ABC Distributors")
     @NotBlank(message = "Name is required")

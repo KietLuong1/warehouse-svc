@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -19,17 +18,17 @@ import java.util.UUID;
 @Schema(description = "Product details")
 public class ProductDTO {
 
-    @Schema(description = "Product ID", example = "1")
-    private Long id;
+    @Schema(description = "Product ID", example = "123e4567-e89b-12d3-a456-426614174000")
+    private String id;
 
-    @Schema(description = "Category ID this product belongs to", example = "2")
-    private Long categoryId;
-    
-    @Schema(description = "Used for product requests", example = "1")
-    private Long productId;
-    
-    @Schema(description = "Supplier ID for this product", example = "3")
-    private Long supplierId;
+    @Schema(description = "Category ID this product belongs to", example = "123e4567-e89b-12d3-a456-426614174001")
+    private String categoryId;
+
+    @Schema(description = "Used for product requests", example = "123e4567-e89b-12d3-a456-426614174002")
+    private String productId;
+
+    @Schema(description = "Supplier ID for this product", example = "123e4567-e89b-12d3-a456-426614174003")
+    private String supplierId;
 
     @Schema(description = "Product name", example = "Smartphone X12")
     private String name;
@@ -58,8 +57,8 @@ public class ProductDTO {
     @Schema(description = "Batch/Lot number", example = "LOT-2024-03-15-A")
     private String batchNumber;
 
-    @Schema(description = "Warehouse ID where product is stored", example = "1")
-    private Long warehouseId;
+    @Schema(description = "Warehouse ID where product is stored", example = "123e4567-e89b-12d3-a456-426614174004")
+    private String warehouseId;
 
     @Schema(description = "Storage bin location within warehouse", example = "A12-B05-C03")
     private String binLocation;

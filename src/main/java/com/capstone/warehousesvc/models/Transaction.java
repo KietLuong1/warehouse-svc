@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @AllArgsConstructor
@@ -22,7 +21,7 @@ public class Transaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private String id;
 
     private Integer totalProducts;
 
@@ -47,7 +46,7 @@ public class Transaction {
     // User relationship removed as user functionality is now handled by loginservice
     // Storing just the user ID from the JWT token
     @Column(name = "user_id")
-    private UUID userId;
+    private String userId;
 
     // Store username for display purposes
     @Column(name = "username")

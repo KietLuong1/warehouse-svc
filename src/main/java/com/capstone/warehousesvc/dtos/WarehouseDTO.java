@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class WarehouseDTO {
     
-    private Long id;
+    private String id;
     
     @Schema(description = "Warehouse name", example = "Main Distribution Center")
     @NotBlank(message = "Name is required")

@@ -38,12 +38,6 @@ public class Response {
     @Schema(description = "Total elements count in paginated response", example = "42")
     private Long totalElements;
 
-    @Schema(description = "User data (when returning single user)")
-    private UserDTO user;
-    
-    @Schema(description = "Users list (when returning multiple users)")
-    private List<UserDTO> users;
-
     @Schema(description = "Supplier data (when returning single supplier)")
     private SupplierDTO supplier;
     

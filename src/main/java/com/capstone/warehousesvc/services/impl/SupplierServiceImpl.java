@@ -21,7 +21,6 @@ import java.util.List;
 @Slf4j
 public class SupplierServiceImpl implements SupplierService {
 
-
     private final SupplierRepository supplierRepository;
     private final ModelMapper modelMapper;
 
@@ -40,7 +39,7 @@ public class SupplierServiceImpl implements SupplierService {
     }
 
     @Override
-    public Response updateSupplier(Long id, SupplierDTO supplierDTO) {
+    public Response updateSupplier(String id, SupplierDTO supplierDTO) {
 
         Supplier existingSupplier = supplierRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Supplier Not Found"));
@@ -73,7 +72,7 @@ public class SupplierServiceImpl implements SupplierService {
     }
 
     @Override
-    public Response getSupplierById(Long id) {
+    public Response getSupplierById(String id) {
 
         Supplier supplier = supplierRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Supplier Not Found"));
@@ -88,7 +87,7 @@ public class SupplierServiceImpl implements SupplierService {
     }
 
     @Override
-    public Response deleteSupplier(Long id) {
+    public Response deleteSupplier(String id) {
 
         supplierRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Supplier Not Found"));

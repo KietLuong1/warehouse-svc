@@ -8,8 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
 import java.util.List;
 
 @Data
@@ -20,8 +18,8 @@ import java.util.List;
 @Schema(description = "Product category details")
 public class CategoryDTO {
 
-    @Schema(description = "Category ID", example = "1")
-    private Long id;
+    @Schema(description = "Category ID", example = "123e4567-e89b-12d3-a456-426614174000")
+    private String id;
 
     @Schema(description = "Category name", example = "Electronics")
     @NotBlank(message = "Name is required")

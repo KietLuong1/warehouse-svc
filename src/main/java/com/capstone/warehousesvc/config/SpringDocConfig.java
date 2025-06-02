@@ -25,7 +25,7 @@ public class SpringDocConfig {
                 .info(new Info()
                         .title("Warehouse Management System API")
                         .version("1.0.0")
-                        .description("API for warehouse management operations"));
+                        .description("API v1 for warehouse management operations"));
     }
     
     @Bean
@@ -39,7 +39,7 @@ public class SpringDocConfig {
     
     @Bean
     @Primary
-    public ModelResolver modelResolver(ObjectMapper objectMapper) {
+    public ModelResolver modelResolver() {
         ObjectMapper docMapper = new ObjectMapper();
         
         // Configure serialization options

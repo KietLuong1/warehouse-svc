@@ -56,7 +56,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Response getCategoryById(Long id) {
+    public Response getCategoryById(String id) {
 
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Category Not Found"));
@@ -71,7 +71,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Response updateCategory(Long id, CategoryDTO categoryDTO) {
+    public Response updateCategory(String id, CategoryDTO categoryDTO) {
 
         Category existingCategory = categoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Category Not Found"));
@@ -88,7 +88,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Response deleteCategory(Long id) {
+    public Response deleteCategory(String id) {
 
         categoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Category Not Found"));

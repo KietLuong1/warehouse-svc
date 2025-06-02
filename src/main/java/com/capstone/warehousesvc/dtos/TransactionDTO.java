@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 public class TransactionDTO {
 
     @Schema(description = "Transaction ID", example = "1")
-    private Long id;
+    private String id;
 
     @Schema(description = "Total number of products in transaction", example = "5")
     private Integer totalProducts;

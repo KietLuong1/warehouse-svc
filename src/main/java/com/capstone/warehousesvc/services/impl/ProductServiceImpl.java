@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -31,10 +32,9 @@ public class ProductServiceImpl implements ProductService {
     private final ModelMapper modelMapper;
     private final CategoryRepository categoryRepository;
 
-    private static final String IMAGE_DIRECTORY = System.getProperty("user.dir") + "/product-images/";
 
-    //AFTER YOUR FRONTEND IS SETUP CHANGE THE IMAGE DIRECTORY TO YHE FRONTEND YOU ARE USING
-    private static final String IMAGE_DIRECTORY_2 = "/Users/dennismac/phegonDev/ims-react/public/products/";
+    //AFTER YOUR FRONTEND IS SETUP CHANGE THE IMAGE DIRECTORY TO THE FRONTEND YOU ARE USING
+    private static final String IMAGE_DIRECTORY_2 = System.getProperty("user.dir") + "/frontend/public/products/";
 
     @Override
     public Response saveProduct(ProductDTO productDTO, MultipartFile imageFile) {
@@ -53,11 +53,10 @@ public class ProductServiceImpl implements ProductService {
                 .build();
 
         if (imageFile != null && !imageFile.isEmpty()) {
-            log.info("Image file exist");
-//            String imagePath = saveImage(imageFile); //use this when you haven't setup your frontend
-            String imagePath = saveImage2(imageFile); //use this when you ave set up your frontend locally but haven't deployed to produiction
+            log.info("Image file exists");
+            String imagePath = saveImage2(imageFile); //use this when you have set up your frontend locally but haven't deployed to production
 
-            System.out.println("IMAGE URL IS: " + imagePath);
+            log.info("Image URL is: {}", imagePath);
             productToSave.setImageUrl(imagePath);
         }
 
@@ -73,21 +72,20 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Response updateProduct(ProductDTO productDTO, MultipartFile imageFile) {
 
-        //check if product exisit
+        //check if product exists
         Product existingProduct = productRepository.findById(productDTO.getProductId())
                 .orElseThrow(() -> new NotFoundException("Product Not Found"));
 
         //check if image is associated with the product to update and upload
         if (imageFile != null && !imageFile.isEmpty()) {
-//            String imagePath = saveImage(imageFile); //use this when you haven't setup your frontend
-            String imagePath = saveImage2(imageFile); //use this when you ave set up your frontend locally but haven't deployed to produiction
+            String imagePath = saveImage2(imageFile); //use this when you have set up your frontend locally but haven't deployed to production
 
-            System.out.println("IMAGE URL IS: " + imagePath);
+            log.info("Image URL is: {}", imagePath);
             existingProduct.setImageUrl(imagePath);
         }
 
-        //check if category is to be chanegd for the products
-        if (productDTO.getCategoryId() != null && productDTO.getCategoryId() > 0) {
+        //check if category is to be changed for the products
+        if (productDTO.getCategoryId() != null && !productDTO.getCategoryId().isEmpty()) {
             Category category = categoryRepository.findById(productDTO.getCategoryId())
                     .orElseThrow(() -> new NotFoundException("Category Not Found"));
             existingProduct.setCategory(category);
@@ -141,7 +139,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Response getProductById(Long id) {
+    public Response getProductById(String id) {
 
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Product Not Found"));
@@ -154,7 +152,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Response deleteProduct(Long id) {
+    public Response deleteProduct(String id) {
 
         productRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Product Not Found"));
@@ -186,42 +184,11 @@ public class ProductServiceImpl implements ProductService {
                 .build();
     }
 
-
-    //this save to the root of your project
-    private String saveImage(MultipartFile imageFile) {
-        //validate image and check if it is greater than 1GIB
-        if (!imageFile.getContentType().startsWith("image/") || imageFile.getSize() > 1024 * 1024 * 1024) {
-            throw new IllegalArgumentException("Only image files under 1GIG is allowed");
-        }
-
-        //create the directory if it doesn't exist
-        File directory = new File(IMAGE_DIRECTORY);
-
-        if (!directory.exists()) {
-            directory.mkdir();
-            log.info("Directory was created");
-        }
-        //generate unique file name for the image
-        String uniqueFileName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
-
-        //Get the absolute path of the image
-        String imagePath = IMAGE_DIRECTORY + uniqueFileName;
-
-        try {
-            File destinationFile = new File(imagePath);
-            imageFile.transferTo(destinationFile); //we are writing the image to this folder
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Error saving Image: " + e.getMessage());
-        }
-        return imagePath;
-
-    }
-
     //This saved image to the public folder in your frontend
     //Use this if your have setup your frontend
     private String saveImage2(MultipartFile imageFile) {
         //validate image and check if it is greater than 1GIB
-        if (!imageFile.getContentType().startsWith("image/") || imageFile.getSize() > 1024 * 1024 * 1024) {
+        if (!Objects.requireNonNull(imageFile.getContentType()).startsWith("image/") || imageFile.getSize() > 1024 * 1024 * 1024) {
             throw new IllegalArgumentException("Only image files under 1GIG is allowed");
         }
 

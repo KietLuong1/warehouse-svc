@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface WarehouseRepository extends JpaRepository<Warehouse, Long> {
+public interface WarehouseRepository extends JpaRepository<Warehouse, String> {
     List<Warehouse> findByActive(Boolean active);
-    boolean existsByName(String name);
-} 
+}

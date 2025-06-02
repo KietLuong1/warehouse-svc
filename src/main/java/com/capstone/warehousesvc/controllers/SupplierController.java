@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Suppliers", description = "Supplier management")
 @RestController
-@RequestMapping("/api/suppliers")
+@RequestMapping("/api/v1/suppliers")
 @RequiredArgsConstructor
 public class SupplierController {
 
@@ -36,21 +36,21 @@ public class SupplierController {
 
     @Operation(summary = "Get supplier by ID")
     @GetMapping("/{id}")
-    public ResponseEntity<Response> getSupplierById(@PathVariable Long id) {
+    public ResponseEntity<Response> getSupplierById(@PathVariable String id) {
         return ResponseEntity.ok(supplierService.getSupplierById(id));
     }
 
     @Operation(summary = "Update supplier", description = "Update an existing supplier (Admin only)")
     @PutMapping("/update/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Response> updateSupplier(@PathVariable Long id, @RequestBody @Valid SupplierDTO supplierDTO) {
+    public ResponseEntity<Response> updateSupplier(@PathVariable String id, @RequestBody @Valid SupplierDTO supplierDTO) {
         return ResponseEntity.ok(supplierService.updateSupplier(id, supplierDTO));
     }
 
     @Operation(summary = "Delete supplier", description = "Delete a supplier (Admin only)")
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Response> deleteSupplier(@PathVariable Long id) {
+    public ResponseEntity<Response> deleteSupplier(@PathVariable String id) {
         return ResponseEntity.ok(supplierService.deleteSupplier(id));
     }
 }

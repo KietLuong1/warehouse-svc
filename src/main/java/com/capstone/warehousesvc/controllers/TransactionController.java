@@ -14,7 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Tag(name = "Transactions", description = "Inventory transactions management")
 @RestController
-@RequestMapping("/api/transactions")
+@RequestMapping("/api/v1/transactions")
 @RequiredArgsConstructor
 public class TransactionController {
 
@@ -49,7 +49,7 @@ public class TransactionController {
 
     @Operation(summary = "Get transaction by ID")
     @GetMapping("/{id}")
-    public ResponseEntity<Response> getTransactionById(@PathVariable Long id) {
+    public ResponseEntity<Response> getTransactionById(@PathVariable String id) {
         return ResponseEntity.ok(transactionService.getAllTransactionById(id));
     }
 
@@ -65,7 +65,7 @@ public class TransactionController {
     @Operation(summary = "Update transaction status", description = "Update the status of an existing transaction")
     @PutMapping("/{transactionId}")
     public ResponseEntity<Response> updateTransactionStatus(
-            @Parameter(description = "Transaction ID") @PathVariable Long transactionId,
+            @Parameter(description = "Transaction ID") @PathVariable String transactionId,
             @Parameter(description = "New transaction status") @RequestBody TransactionStatus status) {
         return ResponseEntity.ok(transactionService.updateTransactionStatus(transactionId, status));
     }
