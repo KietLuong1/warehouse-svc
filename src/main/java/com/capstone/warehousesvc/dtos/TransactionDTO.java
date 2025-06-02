@@ -37,21 +37,24 @@ public class TransactionDTO {
 
     @Schema(description = "Transaction description", example = "Weekly inventory restock")
     private String description;
-    
+
     @Schema(description = "Additional transaction notes", example = "Delivered by John from ABC Suppliers")
     private String note;
 
     @Schema(description = "Transaction creation timestamp")
     private LocalDateTime createdAt;
-    
+
     @Schema(description = "Transaction update timestamp")
     private LocalDateTime updateAt;
 
     @Schema(description = "Product involved in transaction")
     private ProductDTO product;
 
-    @Schema(description = "User who created/processed transaction")
-    private UserDTO user;
+    @Schema(description = "ID of user who created/processed transaction")
+    private Long userId;
+
+    @Schema(description = "Username of user who created/processed transaction")
+    private String username;
 
     @Schema(description = "Supplier for this transaction (for purchases/returns)")
     private SupplierDTO supplier;

@@ -40,7 +40,6 @@ public class SpringDocConfig {
     @Bean
     @Primary
     public ModelResolver modelResolver(ObjectMapper objectMapper) {
-        // Create a new clean ObjectMapper dedicated to OpenAPI schema generation
         ObjectMapper docMapper = new ObjectMapper();
         
         // Configure serialization options
