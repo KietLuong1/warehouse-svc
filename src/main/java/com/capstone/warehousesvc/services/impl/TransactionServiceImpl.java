@@ -11,12 +11,11 @@ import com.capstone.warehousesvc.exceptions.NotFoundException;
 import com.capstone.warehousesvc.models.Product;
 import com.capstone.warehousesvc.models.Supplier;
 import com.capstone.warehousesvc.models.Transaction;
-import com.capstone.warehousesvc.models.User;
 import com.capstone.warehousesvc.repositories.ProductRepository;
 import com.capstone.warehousesvc.repositories.SupplierRepository;
 import com.capstone.warehousesvc.repositories.TransactionRepository;
+import com.capstone.warehousesvc.security.AuthUser;
 import com.capstone.warehousesvc.services.TransactionService;
-import com.capstone.warehousesvc.services.UserService;
 import com.capstone.warehousesvc.specification.TransactionFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +26,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -41,8 +42,25 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final ProductRepository productRepository;
     private final SupplierRepository supplierRepository;
-    private final UserService userService;
     private final ModelMapper modelMapper;
+
+    /**
+     * Helper method to get current user information from security context
+     * @return Object array with userId at index 0 and username at index 1
+     */
+    private Object[] getCurrentUserInfo() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            if (authentication.getPrincipal() instanceof AuthUser) {
+                AuthUser authUser = (AuthUser) authentication.getPrincipal();
+                return new Object[]{authUser.getId(), authUser.getName()};
+            } else {
+                // For cases where we might have a different principal type
+                return new Object[]{0L, authentication.getName()};
+            }
+        }
+        return new Object[]{0L, "system"};
+    }
 
     @Override
     public Response purchase(TransactionRequest transactionRequest) {
@@ -59,7 +77,10 @@ public class TransactionServiceImpl implements TransactionService {
         Supplier supplier = supplierRepository.findById(supplierId)
                 .orElseThrow(() -> new NotFoundException("Supplier Not Found"));
 
-        User user = userService.getCurrentLoggedInUser();
+        // Get user info from security context
+        Object[] userInfo = getCurrentUserInfo();
+        Long userId = (Long) userInfo[0];
+        String username = (String) userInfo[1];
 
         //update the stock quantity and re-save
         product.setStockQuantity(product.getStockQuantity() + quantity);
@@ -70,7 +91,8 @@ public class TransactionServiceImpl implements TransactionService {
                 .transactionType(TransactionType.PURCHASE)
                 .status(TransactionStatus.COMPLETED)
                 .product(product)
-                .user(user)
+                .userId(userId)
+                .username(username)
                 .supplier(supplier)
                 .totalProducts(quantity)
                 .totalPrice(product.getPrice().multiply(BigDecimal.valueOf(quantity)))
@@ -95,7 +117,10 @@ public class TransactionServiceImpl implements TransactionService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException("Product Not Found"));
 
-        User user = userService.getCurrentLoggedInUser();
+        // Get user info from security context
+        Object[] userInfo = getCurrentUserInfo();
+        Long userId = (Long) userInfo[0];
+        String username = (String) userInfo[1];
 
         //update the stock quantity and re-save
         product.setStockQuantity(product.getStockQuantity() - quantity);
@@ -107,7 +132,8 @@ public class TransactionServiceImpl implements TransactionService {
                 .transactionType(TransactionType.SALE)
                 .status(TransactionStatus.COMPLETED)
                 .product(product)
-                .user(user)
+                .userId(userId)
+                .username(username)
                 .totalProducts(quantity)
                 .totalPrice(product.getPrice().multiply(BigDecimal.valueOf(quantity)))
                 .description(transactionRequest.getDescription())
@@ -138,7 +164,10 @@ public class TransactionServiceImpl implements TransactionService {
         Supplier supplier = supplierRepository.findById(supplierId)
                 .orElseThrow(() -> new NotFoundException("Supplier Not Found"));
 
-        User user = userService.getCurrentLoggedInUser();
+        // Get user info from security context
+        Object[] userInfo = getCurrentUserInfo();
+        Long userId = (Long) userInfo[0];
+        String username = (String) userInfo[1];
 
         //update the stock quantity and re-save
         product.setStockQuantity(product.getStockQuantity() - quantity);
@@ -150,7 +179,8 @@ public class TransactionServiceImpl implements TransactionService {
                 .transactionType(TransactionType.RETURN_TO_SUPPLIER)
                 .status(TransactionStatus.PROCESSING)
                 .product(product)
-                .user(user)
+                .userId(userId)
+                .username(username)
                 .totalProducts(quantity)
                 .totalPrice(BigDecimal.ZERO)
                 .description(transactionRequest.getDescription())
@@ -179,7 +209,7 @@ public class TransactionServiceImpl implements TransactionService {
         }.getType());
 
         transactionDTOS.forEach(transactionDTO -> {
-            transactionDTO.setUser(null);
+            // User info is already included as userId and username
             transactionDTO.setProduct(null);
             transactionDTO.setSupplier(null);
         });
@@ -202,7 +232,8 @@ public class TransactionServiceImpl implements TransactionService {
 
         TransactionDTO transactionDTO = modelMapper.map(transaction, TransactionDTO.class);
 
-        transactionDTO.getUser().setTransactions(null);
+        // User info is already included as userId and username
+        // No need to set user transactions to null as we don't have a user object anymore
 
         return Response.builder()
                 .status(200)
@@ -219,7 +250,7 @@ public class TransactionServiceImpl implements TransactionService {
         }.getType());
 
         transactionDTOS.forEach(transactionDTO -> {
-            transactionDTO.setUser(null);
+            // User info is already included as userId and username
             transactionDTO.setProduct(null);
             transactionDTO.setSupplier(null);
         });

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Tag(name = "Products", description = "Product inventory management")
 @RestController
@@ -35,7 +36,7 @@ public class ProductController {
             @Parameter(description = "Product SKU (Stock Keeping Unit)", required = true) @RequestParam("sku") String sku,
             @Parameter(description = "Product price", required = true) @RequestParam("price") BigDecimal price,
             @Parameter(description = "Available stock quantity", required = true) @RequestParam("stockQuantity") Integer stockQuantity,
-            @Parameter(description = "Category ID", required = true) @RequestParam("categoryId") Long categoryId,
+            @Parameter(description = "Category ID", required = true) @RequestParam("categoryId") UUID categoryId,
             @Parameter(description = "Product description") @RequestParam(value = "description", required = false) String description
     ) {
         ProductDTO productDTO = new ProductDTO();
@@ -57,7 +58,7 @@ public class ProductController {
 
     @Operation(summary = "Get product by ID")
     @GetMapping("/{id}")
-    public ResponseEntity<Response> getProductById(@PathVariable Long id) {
+    public ResponseEntity<Response> getProductById(@PathVariable UUID id) {
         return ResponseEntity.ok(productService.getProductById(id));
     }
 
@@ -80,7 +81,7 @@ public class ProductController {
     @Operation(summary = "Delete product", description = "Delete a product (Admin only)")
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Response> deleteProduct(@PathVariable Long id) {
+    public ResponseEntity<Response> deleteProduct(@PathVariable UUID id) {
         return ResponseEntity.ok(productService.deleteProduct(id));
     }
 }

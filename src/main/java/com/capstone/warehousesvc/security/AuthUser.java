@@ -1,6 +1,6 @@
 package com.capstone.warehousesvc.security;
 
-import com.capstone.warehousesvc.models.User;
+import com.capstone.warehousesvc.enums.UserRole;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
@@ -9,25 +9,30 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @Builder
 public class AuthUser implements UserDetails {
-    private User user;
+    private UUID id;
+    private String email;
+    private String password;
+    private String name;
+    private UserRole role;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(user.getRole().name()));
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
     @Override
     public String getPassword() {
-        return user.getPassword();
+        return password;
     }
 
     @Override
     public String getUsername() {
-        return user.getEmail();
+        return email;
     }
 
     @Override
