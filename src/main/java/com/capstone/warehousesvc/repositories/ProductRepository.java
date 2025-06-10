@@ -1,3 +1,4 @@
+
 package com.capstone.warehousesvc.repositories;
 
 import com.capstone.warehousesvc.models.Product;
@@ -7,4 +8,6 @@ import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, String> {
     List<Product> findByNameContainingOrDescriptionContaining(String name, String description);
+
+    List<Product> findByStockQuantityLessThan(Integer threshold);
 }
