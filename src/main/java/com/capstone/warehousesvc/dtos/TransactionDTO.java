@@ -1,5 +1,6 @@
 package com.capstone.warehousesvc.dtos;
 
+import com.capstone.warehousesvc.models.Product;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.capstone.warehousesvc.enums.TransactionStatus;

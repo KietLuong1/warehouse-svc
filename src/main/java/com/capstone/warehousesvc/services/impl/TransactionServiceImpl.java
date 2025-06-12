@@ -206,7 +206,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         transactionDTOS.forEach(transactionDTO -> {
             // User info is already included as userId and username
-            transactionDTO.setProduct(null);
+//            transactionDTO.setProduct(null);
             transactionDTO.setSupplier(null);
         });
 
