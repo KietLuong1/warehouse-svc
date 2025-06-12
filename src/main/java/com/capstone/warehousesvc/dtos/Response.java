@@ -58,9 +58,20 @@ public class Response {
 
     @Schema(description = "Transaction data (when returning single transaction)")
     private TransactionDTO transaction;
-    
-    @Schema(description = "Transactions list (when returning multiple transactions)")
+      @Schema(description = "Transactions list (when returning multiple transactions)")
     private List<TransactionDTO> transactions;
+
+    @Schema(description = "Inventory data (when returning single inventory item)")
+    private InventoryDTO inventory;
+    
+    @Schema(description = "Inventories list (when returning multiple inventory items)")
+    private List<InventoryDTO> inventories;
+
+    @Schema(description = "Warehouse data (when returning single warehouse)")
+    private WarehouseDTO warehouse;
+    
+    @Schema(description = "Warehouses list (when returning multiple warehouses)")
+    private List<WarehouseDTO> warehouses;
 
     @Schema(description = "Generic data map for flexible responses")
     private Map<String, Object> data;
