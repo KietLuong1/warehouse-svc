@@ -38,9 +38,6 @@ public class InventoryServiceImpl implements InventoryService {
     private final WarehouseRepository warehouseRepository;
     private final ModelMapper modelMapper;
 
-    /**
-     * Helper method to get current user information from security context
-     */
     private String getCurrentUserId() {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

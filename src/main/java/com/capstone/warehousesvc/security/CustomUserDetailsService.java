@@ -27,7 +27,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
             // Create a basic AuthUser with information from the JWT claims
             return AuthUser.builder()
-                    .id(UUID.randomUUID()) // This would come from the JWT in a real implementation
+                    .id(UUID.randomUUID().toString()) // This would come from the JWT in a real implementation
                     .email(username)
                     .password("") // Password not needed for token-based auth
                     .name("User from JWT")

@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface InventoryRepository extends JpaRepository<Inventory, String>, JpaSpecificationExecutor<Inventory> {
+public interface InventoryRepository extends JpaRepository<Inventory, String> {
 
     // Find inventory by product and warehouse
     Optional<Inventory> findByProductIdAndWarehouseId(String productId, String warehouseId);
@@ -55,9 +55,9 @@ public interface InventoryRepository extends JpaRepository<Inventory, String>, J
     @Query("SELECT COALESCE(SUM(i.quantityOnHand * i.unitCost), 0) FROM Inventory i WHERE i.unitCost IS NOT NULL")
     BigDecimal getTotalInventoryValue();
 
-    // Get inventory value by warehouse
-    @Query("SELECT COALESCE(SUM(i.quantityOnHand * i.unitCost), 0) FROM Inventory i WHERE i.warehouseId = :warehouseId AND i.unitCost IS NOT NULL")
-    BigDecimal getInventoryValueByWarehouse(@Param("warehouseId") String warehouseId);
+//    // Get inventory value by warehouse
+//    @Query("SELECT COALESCE(SUM(i.quantityOnHand * i.unitCost), 0) FROM Inventory i WHERE i.warehouseId = :warehouseId AND i.unitCost IS NOT NULL")
+//    BigDecimal getInventoryValueByWarehouse(@Param("warehouseId") String warehouseId);
 
     // Get top inventory items by value
     @Query("SELECT i FROM Inventory i WHERE i.unitCost IS NOT NULL ORDER BY (i.quantityOnHand * i.unitCost) DESC")

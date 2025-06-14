@@ -14,7 +14,7 @@ import java.util.UUID;
 @Data
 @Builder
 public class AuthUser implements UserDetails {
-    private UUID id;
+    private String id;
     private String email;
     private String password;
     private String name;
