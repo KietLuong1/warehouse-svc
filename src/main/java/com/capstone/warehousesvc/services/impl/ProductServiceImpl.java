@@ -37,7 +37,7 @@ public class ProductServiceImpl implements ProductService {
     private static final String IMAGE_DIRECTORY_2 = System.getProperty("user.dir") + "/frontend/public/products/";
 
     @Override
-    public Response saveProduct(ProductDTO productDTO, MultipartFile imageFile) {
+    public Response saveProduct(ProductDTO productDTO) {
 
         Category category = categoryRepository.findById(productDTO.getCategoryId())
                 .orElseThrow(() -> new NotFoundException("Category Not Found"));
@@ -52,13 +52,13 @@ public class ProductServiceImpl implements ProductService {
                 .category(category)
                 .build();
 
-        if (imageFile != null && !imageFile.isEmpty()) {
-            log.info("Image file exists");
-            String imagePath = saveImage2(imageFile); //use this when you have set up your frontend locally but haven't deployed to production
-
-            log.info("Image URL is: {}", imagePath);
-            productToSave.setImageUrl(imagePath);
-        }
+//        if (imageFile != null && !imageFile.isEmpty()) {
+//            log.info("Image file exists");
+//            String imagePath = saveImage2(imageFile); //use this when you have set up your frontend locally but haven't deployed to production
+//
+//            log.info("Image URL is: {}", imagePath);
+//            productToSave.setImageUrl(imagePath);
+//        }
 
         //save the product entity
         productRepository.save(productToSave);
@@ -70,19 +70,19 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Response updateProduct(ProductDTO productDTO, MultipartFile imageFile) {
+    public Response updateProduct(ProductDTO productDTO) {
 
         //check if product exists
         Product existingProduct = productRepository.findById(productDTO.getProductId())
                 .orElseThrow(() -> new NotFoundException("Product Not Found"));
 
         //check if image is associated with the product to update and upload
-        if (imageFile != null && !imageFile.isEmpty()) {
-            String imagePath = saveImage2(imageFile); //use this when you have set up your frontend locally but haven't deployed to production
-
-            log.info("Image URL is: {}", imagePath);
-            existingProduct.setImageUrl(imagePath);
-        }
+//        if (imageFile != null && !imageFile.isEmpty()) {
+//            String imagePath = saveImage2(imageFile); //use this when you have set up your frontend locally but haven't deployed to production
+//
+//            log.info("Image URL is: {}", imagePath);
+//            existingProduct.setImageUrl(imagePath);
+//        }
 
         //check if category is to be changed for the products
         if (productDTO.getCategoryId() != null && !productDTO.getCategoryId().isEmpty()) {

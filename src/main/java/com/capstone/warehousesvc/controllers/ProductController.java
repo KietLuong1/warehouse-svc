@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 
+@Slf4j
 @Tag(name = "Products", description = "Product inventory management")
 @RestController
 @RequestMapping("/api/v1/products")
@@ -24,30 +26,17 @@ public class ProductController {
     private final ProductService productService;
 
     @Operation(
-        summary = "Add product", 
-        description = "Add a new product with image upload (Admin only)"
+            summary = "Add product",
+            description = "Add a new product with image upload (Admin only)"
     )
     @PostMapping("/add")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Response> saveProduct(
-            @Parameter(description = "Product image file") @RequestParam("imageFile") MultipartFile imageFile,
-            @Parameter(description = "Product name", required = true) @RequestParam("name") String name,
-            @Parameter(description = "Product SKU (Stock Keeping Unit)", required = true) @RequestParam("sku") String sku,
-            @Parameter(description = "Product price", required = true) @RequestParam("price") BigDecimal price,
-            @Parameter(description = "Available stock quantity", required = true) @RequestParam("stockQuantity") Integer stockQuantity,
-            @Parameter(description = "Category ID", required = true) @RequestParam("categoryId") String categoryId,
-            @Parameter(description = "Product description") @RequestParam(value = "description", required = false) String description
-    ) {
-        ProductDTO productDTO = new ProductDTO();
-        productDTO.setName(name);
-        productDTO.setSku(sku);
-        productDTO.setPrice(price);
-        productDTO.setStockQuantity(stockQuantity);
-        productDTO.setCategoryId(categoryId);
-        productDTO.setDescription(description);
+//    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<Response> saveProduct(@RequestBody ProductDTO productDTO) {
+        System.out.println("Product: " + productDTO);
 
-        return ResponseEntity.ok(productService.saveProduct(productDTO, imageFile));
+        return ResponseEntity.ok(productService.saveProduct(productDTO));
     }
+
 
     @Operation(summary = "Get all products")
     @GetMapping("/all")
@@ -68,33 +57,19 @@ public class ProductController {
     }
 
     @Operation(summary = "Update product", description = "Update an existing product (Admin only)")
-    @PutMapping("/update")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping("/{id}")
     public ResponseEntity<Response> updateProduct(
-            @Parameter(description = "Product image file") @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
-            @Parameter(description = "Product ID", required = true) @RequestParam("productId") String productId,
-            @Parameter(description = "Product name") @RequestParam(value = "name", required = false) String name,
-            @Parameter(description = "Product SKU") @RequestParam(value = "sku", required = false) String sku,
-            @Parameter(description = "Product price") @RequestParam(value = "price", required = false) BigDecimal price,
-            @Parameter(description = "Available stock quantity") @RequestParam(value = "stockQuantity", required = false) Integer stockQuantity,
-            @Parameter(description = "Category ID") @RequestParam(value = "categoryId", required = false) String categoryId,
-            @Parameter(description = "Product description") @RequestParam(value = "description", required = false) String description
+            @RequestBody ProductDTO productDTO,
+            @PathVariable String id
     ) {
-        ProductDTO productDTO = new ProductDTO();
-        productDTO.setProductId(productId);
-        if (name != null) productDTO.setName(name);
-        if (sku != null) productDTO.setSku(sku);
-        if (price != null) productDTO.setPrice(price);
-        if (stockQuantity != null) productDTO.setStockQuantity(stockQuantity);
-        if (categoryId != null) productDTO.setCategoryId(categoryId);
-        if (description != null) productDTO.setDescription(description);
+        productDTO.setProductId(id);
 
-        return ResponseEntity.ok(productService.updateProduct(productDTO, imageFile));
+        return ResponseEntity.ok(productService.updateProduct(productDTO));
     }
 
     @Operation(summary = "Delete product", description = "Delete a product (Admin only)")
     @DeleteMapping("/delete/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+//    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> deleteProduct(@PathVariable String id) {
         return ResponseEntity.ok(productService.deleteProduct(id));
     }

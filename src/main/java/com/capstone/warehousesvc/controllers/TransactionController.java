@@ -2,6 +2,7 @@ package com.capstone.warehousesvc.controllers;
 
 import com.capstone.warehousesvc.dtos.Response;
 import com.capstone.warehousesvc.dtos.TransactionRequest;
+import com.capstone.warehousesvc.dtos.TransactionStatusDTO;
 import com.capstone.warehousesvc.enums.TransactionStatus;
 import com.capstone.warehousesvc.services.TransactionService;
 import jakarta.validation.Valid;
@@ -66,7 +67,7 @@ public class TransactionController {
     @PutMapping("/{transactionId}")
     public ResponseEntity<Response> updateTransactionStatus(
             @Parameter(description = "Transaction ID") @PathVariable String transactionId,
-            @Parameter(description = "New transaction status") @RequestBody TransactionStatus status) {
-        return ResponseEntity.ok(transactionService.updateTransactionStatus(transactionId, status));
+            @Parameter(description = "New transaction status") @RequestBody TransactionStatusDTO status) {
+        return ResponseEntity.ok(transactionService.updateTransactionStatus(transactionId, status.getStatus()));
     }
 }
