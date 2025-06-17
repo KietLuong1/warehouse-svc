@@ -38,6 +38,12 @@ public class Response {
     @Schema(description = "Total elements count in paginated response", example = "42")
     private Long totalElements;
 
+    @Schema(description = "Page size in paginated response", example = "10")
+    private Integer pageSize;
+
+    @Schema(description = "Current page in paginated response", example = "1")
+    private Integer currentPage;
+
     @Schema(description = "Supplier data (when returning single supplier)")
     private SupplierDTO supplier;
     

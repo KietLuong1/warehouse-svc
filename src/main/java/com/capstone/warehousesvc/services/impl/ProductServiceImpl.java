@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -124,18 +126,25 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Response getAllProducts() {
+    public Response getAllProducts(int page, int size) {
+        Sort sort = Sort.by("createdAt").descending();
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
 
-        List<Product> productList = productRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
+        var pageData = productRepository.findAll(pageable);
 
-        List<ProductDTO> productDTOList = modelMapper.map(productList, new TypeToken<List<ProductDTO>>() {
+        List<ProductDTO> productDTOList = modelMapper.map(pageData.getContent(), new TypeToken<List<ProductDTO>>() {
         }.getType());
 
         return Response.builder()
+                .currentPage(page)
+                .pageSize(pageData.getSize())
+                .totalPages(pageData.getTotalPages())
+                .totalElements(pageData.getTotalElements())
                 .status(200)
                 .message("success")
                 .products(productDTOList)
                 .build();
+
     }
 
     @Override
@@ -211,7 +220,7 @@ public class ProductServiceImpl implements ProductService {
         } catch (Exception e) {
             throw new IllegalArgumentException("Error saving Image: " + e.getMessage());
         }
-        return "products/"+uniqueFileName;
+        return "products/" + uniqueFileName;
 
 
     }

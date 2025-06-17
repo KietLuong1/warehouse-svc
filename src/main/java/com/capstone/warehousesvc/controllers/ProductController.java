@@ -31,7 +31,8 @@ public class ProductController {
     )
     @PostMapping("/add")
 //    @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Response> saveProduct(@RequestBody ProductDTO productDTO) {
+    public ResponseEntity<Response> saveProduct(@RequestBody ProductDTO productDTO
+    ) {
         System.out.println("Product: " + productDTO);
 
         return ResponseEntity.ok(productService.saveProduct(productDTO));
@@ -40,8 +41,9 @@ public class ProductController {
 
     @Operation(summary = "Get all products")
     @GetMapping("/all")
-    public ResponseEntity<Response> getAllProducts() {
-        return ResponseEntity.ok(productService.getAllProducts());
+    public ResponseEntity<Response> getAllProducts(@RequestParam(value = "page", required = false, defaultValue = "1") int page,
+                                                   @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+        return ResponseEntity.ok(productService.getAllProducts(page, size));
     }
 
     @Operation(summary = "Get product by ID")

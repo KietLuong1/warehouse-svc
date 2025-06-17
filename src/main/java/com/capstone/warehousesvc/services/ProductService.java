@@ -9,7 +9,7 @@ public interface ProductService {
 
     Response updateProduct(ProductDTO productDTO);
 
-    Response getAllProducts();
+    Response getAllProducts(int page, int size);
 
     Response getProductById(String id);
 
