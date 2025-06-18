@@ -195,7 +195,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Response getAllTransactions(int page, int size, String filter) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "id"));
 
         //user the Transaction specification
         Specification<Transaction> spec = TransactionFilter.byFilter(filter);
@@ -211,6 +211,8 @@ public class TransactionServiceImpl implements TransactionService {
         });
 
         return Response.builder()
+                .currentPage(page)
+                .pageSize(transactionPage.getSize())
                 .status(200)
                 .message("success")
                 .transactions(transactionDTOS)

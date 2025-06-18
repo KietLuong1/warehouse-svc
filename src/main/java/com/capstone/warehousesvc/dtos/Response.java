@@ -80,7 +80,9 @@ public class Response {
     private List<WarehouseDTO> warehouses;
 
     @Schema(description = "Generic data map for flexible responses")
-    private Map<String, Object> data;
+    private Map<String, Object> dataList;
+
+    private Object data;
 
     @Schema(description = "Response timestamp", example = "2024-04-01T12:34:56")
     private final LocalDateTime timestamp = LocalDateTime.now();

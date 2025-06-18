@@ -40,7 +40,7 @@ public class DashboardController {
         Response response = Response.builder()
                 .status(HttpStatus.OK.value())
                 .message("Dashboard summary retrieved successfully")
-                .data(data)
+                .dataList(data)
                 .build();
 
         return ResponseEntity.ok(response);
@@ -61,7 +61,7 @@ public class DashboardController {
         Response response = Response.builder()
                 .status(HttpStatus.OK.value())
                 .message("Dashboard summary for date range retrieved successfully")
-                .data(data)
+                .dataList(data)
                 .build();
 
         return ResponseEntity.ok(response);
@@ -79,7 +79,7 @@ public class DashboardController {
         Response response = Response.builder()
                 .status(HttpStatus.OK.value())
                 .message("Inventory metrics retrieved successfully")
-                .data(data)
+                .dataList(data)
                 .build();
 
         return ResponseEntity.ok(response);
@@ -97,7 +97,7 @@ public class DashboardController {
         Response response = Response.builder()
                 .status(HttpStatus.OK.value())
                 .message("Transaction metrics retrieved successfully")
-                .data(data)
+                .dataList(data)
                 .build();
 
         return ResponseEntity.ok(response);
@@ -118,7 +118,7 @@ public class DashboardController {
         Response response = Response.builder()
                 .status(HttpStatus.OK.value())
                 .message("Transaction metrics for date range retrieved successfully")
-                .data(data)
+                .dataList(data)
                 .build();
 
         return ResponseEntity.ok(response);
@@ -136,7 +136,7 @@ public class DashboardController {
         Response response = Response.builder()
                 .status(HttpStatus.OK.value())
                 .message("Production metrics retrieved successfully")
-                .data(data)
+                .dataList(data)
                 .build();
 
         return ResponseEntity.ok(response);
@@ -157,7 +157,7 @@ public class DashboardController {
         Response response = Response.builder()
                 .status(HttpStatus.OK.value())
                 .message("Production metrics for date range retrieved successfully")
-                .data(data)
+                .dataList(data)
                 .build();
 
         return ResponseEntity.ok(response);
@@ -177,7 +177,7 @@ public class DashboardController {
         Response response = Response.builder()
                 .status(HttpStatus.OK.value())
                 .message("Recent activities retrieved successfully")
-                .data(data)
+                .dataList(data)
                 .build();
 
         return ResponseEntity.ok(response);
@@ -197,7 +197,7 @@ public class DashboardController {
         Response response = Response.builder()
                 .status(HttpStatus.OK.value())
                 .message("Top products retrieved successfully")
-                .data(data)
+                .dataList(data)
                 .build();
 
         return ResponseEntity.ok(response);
@@ -215,7 +215,7 @@ public class DashboardController {
         Response response = Response.builder()
                 .status(HttpStatus.OK.value())
                 .message("Low stock alerts retrieved successfully")
-                .data(data)
+                .dataList(data)
                 .build();
 
         return ResponseEntity.ok(response);
@@ -237,7 +237,7 @@ public class DashboardController {
         Response response = Response.builder()
                 .status(HttpStatus.OK.value())
                 .message("Transaction trends retrieved successfully")
-                .data(data)
+                .dataList(data)
                 .build();
 
         return ResponseEntity.ok(response);

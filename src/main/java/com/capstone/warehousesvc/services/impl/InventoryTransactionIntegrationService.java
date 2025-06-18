@@ -205,7 +205,7 @@ public class InventoryTransactionIntegrationService {
             return Response.builder()
                     .status(200)
                     .message("Success")
-                    .data(java.util.Map.of("totalInventoryValue", totalValue))
+                    .dataList(java.util.Map.of("totalInventoryValue", totalValue))
                     .build();
                     
         } catch (Exception e) {

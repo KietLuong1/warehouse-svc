@@ -33,7 +33,7 @@ public class WarehouseController {
         Response response = Response.builder()
                 .status(HttpStatus.CREATED.value())
                 .message("Warehouse created successfully")
-                .data(data)
+                .dataList(data)
                 .build();
         
         return new ResponseEntity<>(response, HttpStatus.CREATED);
@@ -48,7 +48,7 @@ public class WarehouseController {
         Response response = Response.builder()
                 .status(HttpStatus.OK.value())
                 .message("Warehouse inventory retrieved successfully")
-                .data(data)
+                .dataList(data)
                 .build();
         
         return ResponseEntity.ok(response);
@@ -63,7 +63,7 @@ public class WarehouseController {
         Response response = Response.builder()
                 .status(HttpStatus.OK.value())
                 .message("Warehouses retrieved successfully")
-                .data(data)
+                .dataList(data)
                 .build();
         
         return ResponseEntity.ok(response);
@@ -78,7 +78,7 @@ public class WarehouseController {
         Response response = Response.builder()
                 .status(HttpStatus.OK.value())
                 .message("Active warehouses retrieved successfully")
-                .data(data)
+                .dataList(data)
                 .build();
         
         return ResponseEntity.ok(response);
@@ -93,7 +93,7 @@ public class WarehouseController {
         Response response = Response.builder()
                 .status(HttpStatus.OK.value())
                 .message("Warehouse retrieved successfully")
-                .data(data)
+                .dataList(data)
                 .build();
 
         return ResponseEntity.ok(response);
@@ -110,7 +110,7 @@ public class WarehouseController {
         Response response = Response.builder()
                 .status(HttpStatus.OK.value())
                 .message("Warehouse updated successfully")
-                .data(data)
+                .dataList(data)
                 .build();
 
         return ResponseEntity.ok(response);

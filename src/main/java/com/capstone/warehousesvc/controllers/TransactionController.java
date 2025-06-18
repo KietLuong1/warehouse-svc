@@ -42,8 +42,8 @@ public class TransactionController {
     @Operation(summary = "Get all transactions", description = "Get paginated list of transactions with optional filtering")
     @GetMapping("/all")
     public ResponseEntity<Response> getAllTransactions(
-            @Parameter(description = "Page number (zero-based)") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Page size") @RequestParam(defaultValue = "1000") int size,
+            @Parameter(description = "Page (zero-based)") @RequestParam(defaultValue = "1") int page,
+            @Parameter(description = "Size") @RequestParam(defaultValue = "10") int size,
             @Parameter(description = "Filter criteria") @RequestParam(required = false) String filter) {
         return ResponseEntity.ok(transactionService.getAllTransactions(page, size, filter));
     }

@@ -13,7 +13,7 @@ import com.capstone.warehousesvc.services.InventoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -22,8 +22,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,7 +54,7 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     public Response createInventory(InventoryDTO inventoryDTO) {
-        log.info("Creating inventory for product {} in warehouse {}", 
+        log.info("Creating inventory for product {} in warehouse {}",
                 inventoryDTO.getProductId(), inventoryDTO.getWarehouseId());
 
         // Validate product exists
@@ -153,26 +153,30 @@ public class InventoryServiceImpl implements InventoryService {
         return Response.builder()
                 .status(200)
                 .message("Success")
-                .data(java.util.Map.of("inventory", inventoryDTO))
+                .dataList(java.util.Map.of("inventory", inventoryDTO))
                 .build();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Response getAllInventory() {
+    public Response getAllInventory(int page, int size) {
         log.info("Fetching all inventory");
+        Sort sort = Sort.by("lastUpdated").descending();
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
 
-        List<Inventory> inventories = inventoryRepository.findAll(
-                Sort.by(Sort.Direction.DESC, "lastUpdated"));
+        Page<Inventory> inventories = inventoryRepository.findAll(pageable);
 
         List<InventoryDTO> inventoryDTOs = inventories.stream()
                 .map(this::mapToInventoryDTO)
-                .collect(Collectors.toList());
+                .toList();
 
         return Response.builder()
-                .status(200)
+                .pageSize(pageable.getPageSize())
+                .currentPage(page)
+                .totalElements(inventories.getTotalElements())
+                .totalPages(inventories.getTotalPages()).status(200)
                 .message("Success")
-                .data(java.util.Map.of("inventories", inventoryDTOs))
+                .data(inventoryDTOs)
                 .build();
     }
 
@@ -206,7 +210,7 @@ public class InventoryServiceImpl implements InventoryService {
         return Response.builder()
                 .status(200)
                 .message("Success")
-                .data(java.util.Map.of("inventories", inventoryDTOs))
+                .dataList(java.util.Map.of("inventories", inventoryDTOs))
                 .build();
     }
 
@@ -224,7 +228,7 @@ public class InventoryServiceImpl implements InventoryService {
         return Response.builder()
                 .status(200)
                 .message("Success")
-                .data(java.util.Map.of("inventories", inventoryDTOs))
+                .dataList(java.util.Map.of("inventories", inventoryDTOs))
                 .build();
     }
 
@@ -242,7 +246,7 @@ public class InventoryServiceImpl implements InventoryService {
         return Response.builder()
                 .status(200)
                 .message("Success")
-                .data(java.util.Map.of("inventories", inventoryDTOs))
+                .dataList(java.util.Map.of("inventories", inventoryDTOs))
                 .build();
     }
 
@@ -259,13 +263,13 @@ public class InventoryServiceImpl implements InventoryService {
         return Response.builder()
                 .status(200)
                 .message("Success")
-                .data(java.util.Map.of("inventory", inventoryDTO))
+                .dataList(java.util.Map.of("inventory", inventoryDTO))
                 .build();
     }
 
     @Override
     public Response adjustInventory(InventoryAdjustmentRequest request) {
-        log.info("Adjusting inventory {} by {} with type {}", 
+        log.info("Adjusting inventory {} by {} with type {}",
                 request.getInventoryId(), request.getQuantity(), request.getAdjustmentType());
 
         Inventory inventory = inventoryRepository.findById(request.getInventoryId())
@@ -295,7 +299,7 @@ public class InventoryServiceImpl implements InventoryService {
         return Response.builder()
                 .status(200)
                 .message("Inventory adjusted successfully")
-                .data(java.util.Map.of(
+                .dataList(java.util.Map.of(
                         "previousQuantity", currentQuantity,
                         "newQuantity", newQuantity,
                         "adjustment", request.getQuantity(),
@@ -306,12 +310,12 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     public Response moveInventory(InventoryMovementRequest request) {
-        log.info("Moving inventory from warehouse {} to warehouse {} for product {}", 
+        log.info("Moving inventory from warehouse {} to warehouse {} for product {}",
                 request.getFromWarehouseId(), request.getToWarehouseId(), request.getProductId());
 
         // Find source inventory
         Inventory sourceInventory = inventoryRepository.findByProductIdAndWarehouseId(
-                request.getProductId(), request.getFromWarehouseId())
+                        request.getProductId(), request.getFromWarehouseId())
                 .orElseThrow(() -> new NotFoundException("Source inventory not found"));
 
         // Check if there's enough stock
@@ -354,7 +358,7 @@ public class InventoryServiceImpl implements InventoryService {
         return Response.builder()
                 .status(200)
                 .message("Inventory moved successfully")
-                .data(java.util.Map.of(
+                .dataList(java.util.Map.of(
                         "movedQuantity", request.getQuantity(),
                         "fromWarehouse", request.getFromWarehouseId(),
                         "toWarehouse", request.getToWarehouseId()
@@ -381,7 +385,7 @@ public class InventoryServiceImpl implements InventoryService {
         return Response.builder()
                 .status(200)
                 .message("Inventory reserved successfully")
-                .data(java.util.Map.of(
+                .dataList(java.util.Map.of(
                         "reservedQuantity", quantity,
                         "totalReserved", inventory.getReservedQuantity(),
                         "availableQuantity", inventory.getQuantityOnHand() - inventory.getReservedQuantity()
@@ -407,7 +411,7 @@ public class InventoryServiceImpl implements InventoryService {
         return Response.builder()
                 .status(200)
                 .message("Reservation released successfully")
-                .data(java.util.Map.of(
+                .dataList(java.util.Map.of(
                         "releasedQuantity", quantity,
                         "totalReserved", inventory.getReservedQuantity(),
                         "availableQuantity", inventory.getQuantityOnHand() - inventory.getReservedQuantity()
@@ -432,7 +436,7 @@ public class InventoryServiceImpl implements InventoryService {
         return Response.builder()
                 .status(200)
                 .message("Success")
-                .data(java.util.Map.of("summary", summary))
+                .dataList(java.util.Map.of("summary", summary))
                 .build();
     }
 
@@ -449,7 +453,7 @@ public class InventoryServiceImpl implements InventoryService {
         return Response.builder()
                 .status(200)
                 .message("Success")
-                .data(java.util.Map.of("lowStockItems", inventoryDTOs))
+                .dataList(java.util.Map.of("lowStockItems", inventoryDTOs))
                 .build();
     }
 
@@ -466,7 +470,7 @@ public class InventoryServiceImpl implements InventoryService {
         return Response.builder()
                 .status(200)
                 .message("Success")
-                .data(java.util.Map.of("overstockItems", inventoryDTOs))
+                .dataList(java.util.Map.of("overstockItems", inventoryDTOs))
                 .build();
     }
 
@@ -483,7 +487,7 @@ public class InventoryServiceImpl implements InventoryService {
         return Response.builder()
                 .status(200)
                 .message("Success")
-                .data(java.util.Map.of("outOfStockItems", inventoryDTOs))
+                .dataList(java.util.Map.of("outOfStockItems", inventoryDTOs))
                 .build();
     }
 
@@ -501,7 +505,7 @@ public class InventoryServiceImpl implements InventoryService {
         return Response.builder()
                 .status(200)
                 .message("Success")
-                .data(java.util.Map.of("expiringItems", inventoryDTOs))
+                .dataList(java.util.Map.of("expiringItems", inventoryDTOs))
                 .build();
     }
 
@@ -512,7 +516,7 @@ public class InventoryServiceImpl implements InventoryService {
 
         Pageable pageable = PageRequest.of(0, limit);
         List<Inventory> topItems = inventoryRepository.findTopInventoryItemsByValue();
-        
+
         List<InventoryDTO> inventoryDTOs = topItems.stream()
                 .limit(limit)
                 .map(this::mapToInventoryDTO)
@@ -521,7 +525,7 @@ public class InventoryServiceImpl implements InventoryService {
         return Response.builder()
                 .status(200)
                 .message("Success")
-                .data(java.util.Map.of("topInventoryItems", inventoryDTOs))
+                .dataList(java.util.Map.of("topInventoryItems", inventoryDTOs))
                 .build();
     }
 
@@ -538,7 +542,7 @@ public class InventoryServiceImpl implements InventoryService {
         return Response.builder()
                 .status(200)
                 .message("Success")
-                .data(java.util.Map.of("inventories", inventoryDTOs))
+                .dataList(java.util.Map.of("inventories", inventoryDTOs))
                 .build();
     }
 
@@ -555,7 +559,7 @@ public class InventoryServiceImpl implements InventoryService {
         return Response.builder()
                 .status(200)
                 .message("Success")
-                .data(java.util.Map.of("inventories", inventoryDTOs))
+                .dataList(java.util.Map.of("inventories", inventoryDTOs))
                 .build();
     }
 
@@ -590,7 +594,7 @@ public class InventoryServiceImpl implements InventoryService {
         return Response.builder()
                 .status(200)
                 .message("Success")
-                .data(java.util.Map.of("itemsNeedingCount", inventoryDTOs))
+                .dataList(java.util.Map.of("itemsNeedingCount", inventoryDTOs))
                 .build();
     }
 
@@ -629,7 +633,7 @@ public class InventoryServiceImpl implements InventoryService {
         return Response.builder()
                 .status(200)
                 .message("Inventory count completed successfully")
-                .data(java.util.Map.of(
+                .dataList(java.util.Map.of(
                         "previousQuantity", previousQuantity,
                         "countedQuantity", countedQuantity,
                         "variance", variance,
@@ -644,13 +648,13 @@ public class InventoryServiceImpl implements InventoryService {
      */
     private InventoryDTO mapToInventoryDTO(Inventory inventory) {
         InventoryDTO dto = modelMapper.map(inventory, InventoryDTO.class);
-        
+
         // Set computed fields
         dto.setAvailableQuantity(inventory.getAvailableQuantity());
         dto.setIsLowStock(inventory.isLowStock());
         dto.setIsOverstock(inventory.isOverstock());
         dto.setTotalValue(inventory.getTotalValue());
-        
+
         // Map product and warehouse details
         if (inventory.getProduct() != null) {
             dto.setProduct(modelMapper.map(inventory.getProduct(), ProductDTO.class));
@@ -658,7 +662,7 @@ public class InventoryServiceImpl implements InventoryService {
         if (inventory.getWarehouse() != null) {
             dto.setWarehouse(modelMapper.map(inventory.getWarehouse(), WarehouseDTO.class));
         }
-        
+
         return dto;
     }
 }

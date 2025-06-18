@@ -13,7 +13,7 @@ public interface InventoryService {
     
     Response getInventoryById(String id);
     
-    Response getAllInventory();
+    Response getAllInventory(int page, int size);
     
     Response deleteInventory(String id);
 
