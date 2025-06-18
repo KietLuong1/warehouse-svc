@@ -278,6 +278,32 @@ public class TransactionServiceImpl implements TransactionService {
 
 
     }
+    @Override
+    public Response searchTransactionsByProductName(String productName, int page, int size) {
+
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        Specification<Transaction> spec = TransactionFilter.byProductName(productName);
+        Page<Transaction> transactionPage = transactionRepository.findAll(spec, pageable);
+
+        List<TransactionDTO> transactionDTOS = modelMapper.map(transactionPage.getContent(), new TypeToken<List<TransactionDTO>>() {
+        }.getType());
+
+        transactionDTOS.forEach(transactionDTO -> {
+            // Keep product information for search results
+            transactionDTO.setSupplier(null);
+        });
+
+        return Response.builder()
+                .currentPage(page)
+                .pageSize(transactionPage.getSize())
+                .status(200)
+                .message("Transactions found successfully")
+                .transactions(transactionDTOS)
+                .totalElements(transactionPage.getTotalElements())
+                .totalPages(transactionPage.getTotalPages())
+                .build();
+    }
 
 
 }

@@ -1,7 +1,9 @@
 package com.capstone.warehousesvc.specification;
 
+import com.capstone.warehousesvc.models.Product;
 import com.capstone.warehousesvc.models.Transaction;
 import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
@@ -84,4 +86,23 @@ public class TransactionFilter {
             return criteriaBuilder.and(monthPredicate, yearPredicate);
         };
     }
+
+
+    public static Specification<Transaction> byProductName(String productName) {
+        return (root, query, criteriaBuilder) -> {
+            if (productName == null || productName.trim().isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+
+            Join<Transaction, Product> productJoin = root.join("product", JoinType.INNER);
+
+            String searchPattern = "%" + productName.toLowerCase() + "%";
+
+            return criteriaBuilder.like(
+                    criteriaBuilder.lower(productJoin.get("name")),
+                    searchPattern
+            );
+        };
+    }
+
 }

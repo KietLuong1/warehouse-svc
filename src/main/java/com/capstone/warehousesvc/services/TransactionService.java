@@ -18,4 +18,6 @@ public interface TransactionService {
     Response getAllTransactionByMonthAndYear(int month, int year);
 
     Response updateTransactionStatus(String transactionId, TransactionStatus status);
+
+    Response searchTransactionsByProductName(String productName, int page, int size);
 }

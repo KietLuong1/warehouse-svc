@@ -54,8 +54,8 @@ public class TransactionController {
         return ResponseEntity.ok(transactionService.getAllTransactionById(id));
     }
 
-    @Operation(summary = "Get transactions by month/year", 
-               description = "Filter transactions by month and year")
+    @Operation(summary = "Get transactions by month/year",
+            description = "Filter transactions by month and year")
     @GetMapping("/by-month-year")
     public ResponseEntity<Response> getTransactionByMonthAndYear(
             @Parameter(name = "month", description = "Month (1-12)", example = "3") @RequestParam int month,
@@ -70,4 +70,16 @@ public class TransactionController {
             @Parameter(description = "New transaction status") @RequestBody TransactionStatusDTO status) {
         return ResponseEntity.ok(transactionService.updateTransactionStatus(transactionId, status.getStatus()));
     }
+
+    @Operation(summary = "Search transactions by product name",
+            description = "Search transactions by product name with pagination")
+    @GetMapping("/search")
+    public ResponseEntity<Response> searchTransactionsByProductName(
+            @Parameter(description = "Search keyword for product name") @RequestParam("keyword") String keyword,
+            @Parameter(description = "Page (zero-based)") @RequestParam(defaultValue = "1") int page,
+            @Parameter(description = "Size") @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(transactionService.searchTransactionsByProductName(keyword, page, size));
+    }
+
+
 }
