@@ -66,8 +66,10 @@ public class InventoryController {
             description = "Search inventory by product name or SKU")
     @GetMapping("/search")
     public ResponseEntity<Response> searchInventory(
-            @Parameter(description = "Search term") @RequestParam String searchTerm) {
-        return ResponseEntity.ok(inventoryService.searchInventory(searchTerm));
+            @Parameter(description = "Search term") @RequestParam("keyword") String keyword,
+            @Parameter(description = "Page (zero-based)") @RequestParam(defaultValue = "1") int page,
+            @Parameter(description = "Size") @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(inventoryService.searchInventory(keyword, page, size));
     }
 
     @Operation(summary = "Get inventory by product",

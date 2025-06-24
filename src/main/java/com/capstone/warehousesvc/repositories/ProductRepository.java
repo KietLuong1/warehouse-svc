@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, String> {
-    List<Product> findByNameContainingOrDescriptionContaining(String name, String description);
+    Page<Product> findByNameContainingOrDescriptionContaining(String name, String description, Pageable pageable);
 
     List<Product> findByStockQuantityLessThan(Integer threshold);
 }

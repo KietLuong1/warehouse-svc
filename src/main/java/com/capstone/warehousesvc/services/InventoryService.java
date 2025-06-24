@@ -18,7 +18,7 @@ public interface InventoryService {
     Response deleteInventory(String id);
 
     // Search and Filter Operations
-    Response searchInventory(String searchTerm);
+    Response searchInventory(String keyword, int page, int size);
     
     Response getInventoryByProduct(String productId);
     

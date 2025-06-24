@@ -13,6 +13,7 @@ import com.capstone.warehousesvc.services.InventoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -198,19 +199,29 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public Response searchInventory(String searchTerm) {
-        log.info("Searching inventory with term: {}", searchTerm);
+    public Response searchInventory(String keyword, int page, int size) {
+        log.info("Searching inventory with term: {}", keyword);
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Inventory> inventories = inventoryRepository
+                .searchInventory(keyword, pageable);
 
-        List<Inventory> inventories = inventoryRepository.searchInventory(searchTerm);
+        if (inventories.isEmpty()) {
+            throw new NotFoundException("Inventories Not Found");
+        }
 
-        List<InventoryDTO> inventoryDTOs = inventories.stream()
-                .map(this::mapToInventoryDTO)
-                .collect(Collectors.toList());
+        List<InventoryDTO> inventoryDTOs = modelMapper.map(
+                inventories.getContent(),
+                new TypeToken<List<InventoryDTO>>() {}.getType()
+        );
 
         return Response.builder()
+                .currentPage(page)
+                .pageSize(inventories.getSize())
+                .totalElements(inventories.getTotalElements())
+                .totalPages(inventories.getTotalPages())
                 .status(200)
                 .message("Success")
-                .dataList(java.util.Map.of("inventories", inventoryDTOs))
+                .data(inventoryDTOs)
                 .build();
     }
 

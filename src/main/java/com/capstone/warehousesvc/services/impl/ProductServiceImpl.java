@@ -6,6 +6,7 @@ import com.capstone.warehousesvc.dtos.Response;
 import com.capstone.warehousesvc.exceptions.NotFoundException;
 import com.capstone.warehousesvc.models.Category;
 import com.capstone.warehousesvc.models.Product;
+import com.capstone.warehousesvc.models.Transaction;
 import com.capstone.warehousesvc.repositories.CategoryRepository;
 import com.capstone.warehousesvc.repositories.ProductRepository;
 import com.capstone.warehousesvc.services.ProductService;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -175,18 +177,24 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Response searchProduct(String input) {
+    public Response searchProduct(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Product> productPage = productRepository
+                .findByNameContainingOrDescriptionContaining(keyword, keyword, pageable);
 
-        List<Product> products = productRepository.findByNameContainingOrDescriptionContaining(input, input);
-
-        if (products.isEmpty()) {
+        if (productPage.isEmpty()) {
             throw new NotFoundException("Product Not Found");
         }
 
-        List<ProductDTO> productDTOList = modelMapper.map(products, new TypeToken<List<ProductDTO>>() {
-        }.getType());
-
+        List<ProductDTO> productDTOList = modelMapper.map(
+                productPage.getContent(),
+                new TypeToken<List<ProductDTO>>() {}.getType()
+        );
         return Response.builder()
+                .currentPage(page)
+                .pageSize(productPage.getSize())
+                .totalElements(productPage.getTotalElements())
+                .totalPages(productPage.getTotalPages())
                 .status(200)
                 .message("success")
                 .products(productDTOList)

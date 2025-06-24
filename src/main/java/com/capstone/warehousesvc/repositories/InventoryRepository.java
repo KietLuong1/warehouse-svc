@@ -1,6 +1,8 @@
 package com.capstone.warehousesvc.repositories;
 
 import com.capstone.warehousesvc.models.Inventory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -47,9 +49,9 @@ public interface InventoryRepository extends JpaRepository<Inventory, String> {
 
     // Search inventory by product name or SKU
     @Query("SELECT i FROM Inventory i JOIN i.product p WHERE " +
-           "LOWER(p.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-           "LOWER(p.sku) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
-    List<Inventory> searchInventory(@Param("searchTerm") String searchTerm);
+           "LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(p.sku) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    Page<Inventory> searchInventory(@Param("keyword") String keyword, Pageable pageable);
 
     // Get total inventory value
     @Query("SELECT COALESCE(SUM(i.quantityOnHand * i.unitCost), 0) FROM Inventory i WHERE i.unitCost IS NOT NULL")

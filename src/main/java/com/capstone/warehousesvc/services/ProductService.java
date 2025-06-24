@@ -15,5 +15,5 @@ public interface ProductService {
 
     Response deleteProduct(String id);
 
-    Response searchProduct(String input);
+    Response searchProduct(String keyword, int page, int size);
 }
