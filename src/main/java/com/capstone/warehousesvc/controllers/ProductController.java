@@ -41,10 +41,16 @@ public class ProductController {
 
     @Operation(summary = "Get all products")
     @GetMapping("/all")
-    public ResponseEntity<Response> getAllProducts(@RequestParam(value = "page", required = false, defaultValue = "1") int page,
-                                                   @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
-        return ResponseEntity.ok(productService.getAllProducts(page, size));
+    public ResponseEntity<Response> getAllProducts(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String categoryId,
+            @RequestParam(required = false) String warehouseId
+            ) {
+        return ResponseEntity.ok(productService.getAllProducts(page, size, keyword, categoryId, warehouseId));
     }
+
 
     @Operation(summary = "Get product by ID")
     @GetMapping("/{id}")

@@ -11,7 +11,7 @@ public interface TransactionService {
 
     Response returnToSupplier(TransactionRequest transactionRequest);
 
-    Response getAllTransactions(int page, int size, String filter);
+    Response getAllTransactions(int page, int size, String filter, String status, String transactionType);
 
     Response getAllTransactionById(String id);
 

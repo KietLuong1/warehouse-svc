@@ -1,5 +1,7 @@
 package com.capstone.warehousesvc.specification;
 
+import com.capstone.warehousesvc.enums.TransactionStatus;
+import com.capstone.warehousesvc.enums.TransactionType;
 import com.capstone.warehousesvc.models.Product;
 import com.capstone.warehousesvc.models.Transaction;
 import jakarta.persistence.criteria.Expression;
@@ -8,68 +10,55 @@ import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 //Specification is used in Filtering data in a database
 public class TransactionFilter {
 
-
-    public static Specification<Transaction> byFilter(String searchValue) {
-        return (root, query, criteriaBuilder) -> {
-            // If filter is null or empty, return true for all transactions
-            if (searchValue == null || searchValue.isEmpty()) {
-                return criteriaBuilder.conjunction(); // Always true
-            }
-
-            String searchPattern = "%" + searchValue.toLowerCase() + "%";
-
-            // Create a list to hold all predicates
+    public static Specification<Transaction> byFilter(String filter, String status, String transactionType) {
+        return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            // Check transactions fields
-            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("description")), searchPattern));
-            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("note")), searchPattern));
-            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("status").as(String.class)), searchPattern));
-            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("transactionType").as(String.class)), searchPattern));
+            if (filter != null && !filter.isEmpty()) {
+                String searchPattern = "%" + filter.toLowerCase() + "%";
+                List<Predicate> keywordPredicates = new ArrayList<>();
 
-            // Safely join and check user fields using LEFT JOIN
-            if (root.getJoins().stream().noneMatch(j -> j.getAttribute().getName().equals("user"))) {
-                root.join("user", JoinType.LEFT);
+                keywordPredicates.add(cb.like(cb.lower(root.get("description")), searchPattern));
+                keywordPredicates.add(cb.like(cb.lower(root.get("note")), searchPattern));
+                keywordPredicates.add(cb.like(cb.lower(root.get("status").as(String.class)), searchPattern));
+                keywordPredicates.add(cb.like(cb.lower(root.get("transactionType").as(String.class)), searchPattern));
+
+                keywordPredicates.add(cb.like(cb.lower(root.get("username")), searchPattern));
+                keywordPredicates.add(cb.like(cb.lower(root.get("userId")), searchPattern));
+
+                Join<?, ?> supplierJoin = root.join("supplier", JoinType.LEFT);
+                keywordPredicates.add(cb.like(cb.lower(supplierJoin.get("name")), searchPattern));
+                keywordPredicates.add(cb.like(cb.lower(supplierJoin.get("contactInfo")), searchPattern));
+
+                Join<?, ?> productJoin = root.join("product", JoinType.LEFT);
+                keywordPredicates.add(cb.like(cb.lower(productJoin.get("name")), searchPattern));
+                keywordPredicates.add(cb.like(cb.lower(productJoin.get("sku")), searchPattern));
+                keywordPredicates.add(cb.like(cb.lower(productJoin.get("description")), searchPattern));
+
+                Join<?, ?> categoryJoin = productJoin.join("category", JoinType.LEFT);
+                keywordPredicates.add(cb.like(cb.lower(categoryJoin.get("name")), searchPattern));
+
+                predicates.add(cb.or(keywordPredicates.toArray(new Predicate[0])));
             }
-            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.join("user", JoinType.LEFT).get("name")), searchPattern));
-            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.join("user", JoinType.LEFT).get("email")), searchPattern));
-            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.join("user", JoinType.LEFT).get("phoneNumber")), searchPattern));
 
-            // Safely join and check supplier fields using LEFT JOIN
-            if (root.getJoins().stream().noneMatch(j -> j.getAttribute().getName().equals("supplier"))) {
-                root.join("supplier", JoinType.LEFT);
-            }
-            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.join("supplier", JoinType.LEFT).get("name")), searchPattern));
-            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.join("supplier", JoinType.LEFT).get("contactInfo")), searchPattern));
-
-            // Safely join and check product fields using LEFT JOIN
-            if (root.getJoins().stream().noneMatch(j -> j.getAttribute().getName().equals("product"))) {
-                root.join("product", JoinType.LEFT);
+            if (status != null && !status.isEmpty()) {
+                predicates.add(cb.equal(root.get("status").as(String.class), status));
             }
 
-            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.join("product", JoinType.LEFT).get("name")), searchPattern));
-            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.join("product", JoinType.LEFT).get("sku")), searchPattern));
-            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.join("product", JoinType.LEFT).get("description")), searchPattern));
-
-            // Safely join product category using LEFT JOIN
-            if (root.getJoins().stream().noneMatch(j -> j.getAttribute().getName().equals("product")) &&
-                    root.join("product").getJoins().stream().noneMatch(j -> j.getAttribute().getName().equals("category"))) {
-                root.join("product", JoinType.LEFT).join("category", JoinType.LEFT);
+            if (transactionType != null && !transactionType.isEmpty()) {
+                predicates.add(cb.equal(root.get("transactionType").as(String.class), transactionType));
             }
-            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.join("product", JoinType.LEFT)
-                    .join("category", JoinType.LEFT).get("name")), searchPattern));
 
-            // Combine all predicates with OR
-            return criteriaBuilder.or(predicates.toArray(new Predicate[0]));
+            return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
-
 
     // New method for filtering transactions by month and year
     public static Specification<Transaction> byMonthAndYear(int month, int year) {

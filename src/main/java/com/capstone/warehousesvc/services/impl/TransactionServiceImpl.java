@@ -193,12 +193,12 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Response getAllTransactions(int page, int size, String filter) {
+    public Response getAllTransactions(int page, int size, String filter, String status, String transactionType) {
 
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "id"));
 
         //user the Transaction specification
-        Specification<Transaction> spec = TransactionFilter.byFilter(filter);
+        Specification<Transaction> spec = TransactionFilter.byFilter(filter, status, transactionType);
         Page<Transaction> transactionPage = transactionRepository.findAll(spec, pageable);
 
         List<TransactionDTO> transactionDTOS = modelMapper.map(transactionPage.getContent(), new TypeToken<List<TransactionDTO>>() {

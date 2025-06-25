@@ -44,8 +44,10 @@ public class TransactionController {
     public ResponseEntity<Response> getAllTransactions(
             @Parameter(description = "Page (zero-based)") @RequestParam(defaultValue = "1") int page,
             @Parameter(description = "Size") @RequestParam(defaultValue = "10") int size,
-            @Parameter(description = "Filter criteria") @RequestParam(required = false) String filter) {
-        return ResponseEntity.ok(transactionService.getAllTransactions(page, size, filter));
+            @Parameter(description = "Filter criteria") @RequestParam(required = false) String filter,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String transactionType) {
+        return ResponseEntity.ok(transactionService.getAllTransactions(page, size, filter, status, transactionType));
     }
 
     @Operation(summary = "Get transaction by ID")

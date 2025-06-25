@@ -10,6 +10,7 @@ import com.capstone.warehousesvc.models.Transaction;
 import com.capstone.warehousesvc.repositories.CategoryRepository;
 import com.capstone.warehousesvc.repositories.ProductRepository;
 import com.capstone.warehousesvc.services.ProductService;
+import com.capstone.warehousesvc.specification.ProductFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -128,26 +130,27 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Response getAllProducts(int page, int size) {
-        Sort sort = Sort.by("createdAt").descending();
-        Pageable pageable = PageRequest.of(page - 1, size, sort);
+    public Response getAllProducts(int page, int size, String keyword, String categoryId, String warehouseId) {
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "id"));
+        Specification<Product> spec = ProductFilter.byKeyword(keyword, categoryId, warehouseId);
+        Page<Product> pageResult = productRepository.findAll(spec, pageable);
 
-        var pageData = productRepository.findAll(pageable);
-
-        List<ProductDTO> productDTOList = modelMapper.map(pageData.getContent(), new TypeToken<List<ProductDTO>>() {
-        }.getType());
+        List<ProductDTO> productDTOs = modelMapper.map(
+                pageResult.getContent(),
+                new TypeToken<List<ProductDTO>>() {}.getType()
+        );
 
         return Response.builder()
-                .currentPage(page)
-                .pageSize(pageData.getSize())
-                .totalPages(pageData.getTotalPages())
-                .totalElements(pageData.getTotalElements())
                 .status(200)
-                .message("success")
-                .products(productDTOList)
+                .message("Success")
+                .currentPage(page)
+                .pageSize(size)
+                .totalElements(pageResult.getTotalElements())
+                .totalPages(pageResult.getTotalPages())
+                .products(productDTOs)
                 .build();
-
     }
+
 
     @Override
     public Response getProductById(String id) {
