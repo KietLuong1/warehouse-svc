@@ -10,6 +10,8 @@ import com.capstone.warehousesvc.repositories.ProductRepository;
 import com.capstone.warehousesvc.repositories.WarehouseRepository;
 import com.capstone.warehousesvc.security.AuthUser;
 import com.capstone.warehousesvc.services.InventoryService;
+import com.capstone.warehousesvc.specification.InventoryFilter;
+import com.capstone.warehousesvc.specification.ProductFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -18,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -160,12 +163,13 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public Response getAllInventory(int page, int size) {
+    public Response getAllInventory(int page, int size, String keyword, String warehouseId) {
         log.info("Fetching all inventory");
         Sort sort = Sort.by("lastUpdated").descending();
         Pageable pageable = PageRequest.of(page - 1, size, sort);
+        Specification<Inventory> spec = InventoryFilter.byKeyword(keyword, warehouseId);
 
-        Page<Inventory> inventories = inventoryRepository.findAll(pageable);
+        Page<Inventory> inventories = inventoryRepository.findAll(spec,pageable);
 
         List<InventoryDTO> inventoryDTOs = inventories.stream()
                 .map(this::mapToInventoryDTO)

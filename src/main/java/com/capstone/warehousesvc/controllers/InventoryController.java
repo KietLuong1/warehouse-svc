@@ -49,8 +49,10 @@ public class InventoryController {
             description = "Retrieve all inventory records with pagination")
     @GetMapping("/all")
     public ResponseEntity<Response> getAllInventory(@RequestParam(value = "page", required = false, defaultValue = "1") int page,
-                                                    @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
-        return ResponseEntity.ok(inventoryService.getAllInventory(page, size));
+                                                    @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+                                                    @RequestParam (value = "keyword", required = false) String keyword,
+                                                    @RequestParam (value = "warehouseId", required = false) String warehouseId ){
+        return ResponseEntity.ok(inventoryService.getAllInventory(page, size, keyword, warehouseId));
     }
 
     @Operation(summary = "Delete inventory record",
