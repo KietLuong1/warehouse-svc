@@ -1,6 +1,7 @@
 package com.capstone.warehousesvc.controllers;
 
 import com.capstone.warehousesvc.dtos.*;
+import com.capstone.warehousesvc.dtos.dashboard.*;
 import com.capstone.warehousesvc.services.DashboardService;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
@@ -19,11 +20,11 @@ import java.util.List;
 import java.util.Map;
 
 @Tag(name = "Dashboard", description = "Dashboard analytics and metrics")
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173", "http://localhost:4200", "http://127.0.0.1:3000"})
 @RestController
 @RequestMapping("/api/v1/dashboard")  // Updated path
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class DashboardController {
 
     private final DashboardService dashboardService;
@@ -34,13 +35,10 @@ public class DashboardController {
         log.info("Fetching dashboard summary");
         DashboardDTO summary = dashboardService.getDashboardSummary();
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("dashboard", summary);
-
         Response response = Response.builder()
                 .status(HttpStatus.OK.value())
                 .message("Dashboard summary retrieved successfully")
-                .dataList(data)
+                .data(summary)
                 .build();
 
         return ResponseEntity.ok(response);
@@ -209,13 +207,10 @@ public class DashboardController {
         log.info("Fetching low stock alerts");
         List<LowStockAlert> alerts = dashboardService.getLowStockAlerts();
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("alerts", alerts);
-
         Response response = Response.builder()
                 .status(HttpStatus.OK.value())
                 .message("Low stock alerts retrieved successfully")
-                .dataList(data)
+                .data(alerts)
                 .build();
 
         return ResponseEntity.ok(response);
@@ -228,16 +223,12 @@ public class DashboardController {
             @Schema(allowableValues = {"DAILY", "WEEKLY", "MONTHLY"})
             @RequestParam(defaultValue = "DAILY") String period) {
 
-        log.info("Fetching transaction trends for period: {}", period);
         List<TransactionTrend> trends = dashboardService.getTransactionTrends(period);
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("trends", trends);
 
         Response response = Response.builder()
                 .status(HttpStatus.OK.value())
                 .message("Transaction trends retrieved successfully")
-                .dataList(data)
+                .data(trends)
                 .build();
 
         return ResponseEntity.ok(response);

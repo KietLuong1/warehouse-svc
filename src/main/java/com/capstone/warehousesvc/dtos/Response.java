@@ -84,6 +84,8 @@ public class Response {
 
     private Object data;
 
+    private Object dashboard;
+
     @Schema(description = "Response timestamp", example = "2024-04-01T12:34:56")
     private final LocalDateTime timestamp = LocalDateTime.now();
 }

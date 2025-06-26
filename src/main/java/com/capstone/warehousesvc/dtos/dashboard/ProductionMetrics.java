@@ -1,5 +1,5 @@
 
-package com.capstone.warehousesvc.dtos;
+package com.capstone.warehousesvc.dtos.dashboard;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

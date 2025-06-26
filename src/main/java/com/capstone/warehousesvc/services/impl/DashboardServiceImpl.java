@@ -1,6 +1,6 @@
 package com.capstone.warehousesvc.services.impl;
 
-import com.capstone.warehousesvc.dtos.*;
+import com.capstone.warehousesvc.dtos.dashboard.*;
 import com.capstone.warehousesvc.enums.TransactionStatus;
 import com.capstone.warehousesvc.enums.TransactionType;
 import com.capstone.warehousesvc.models.Product;
@@ -30,7 +30,6 @@ public class DashboardServiceImpl implements DashboardService {
 
     private final ProductRepository productRepository;
     private final TransactionRepository transactionRepository;
-    private final CategoryRepository categoryRepository;
     private final SupplierRepository supplierRepository;
 
     private static final int LOW_STOCK_THRESHOLD = 10;

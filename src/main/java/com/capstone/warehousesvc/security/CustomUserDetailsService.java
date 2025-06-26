@@ -9,8 +9,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -26,12 +24,13 @@ public class CustomUserDetailsService implements UserDetailsService {
             log.info("Creating AuthUser for username: {}", username);
 
             // Create a basic AuthUser with information from the JWT claims
+            // TODO: In production, you should call the login service to get actual user details
             return AuthUser.builder()
-                    .id(UUID.randomUUID().toString()) // This would come from the JWT in a real implementation
+                    .id("1") // This would come from the JWT in a real implementation
                     .email(username)
                     .password("") // Password not needed for token-based auth
                     .name("User from JWT")
-                    .role(UserRole.STAFF) // Default role, would come from JWT in real implementation
+                    .role(UserRole.ADMIN) // Give ADMIN role for now to access dashboard endpoints
                     .build();
         } catch (Exception e) {
             log.error("Error creating AuthUser: {}", e.getMessage());

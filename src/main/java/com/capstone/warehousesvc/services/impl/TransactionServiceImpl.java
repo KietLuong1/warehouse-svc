@@ -14,7 +14,6 @@ import com.capstone.warehousesvc.models.Transaction;
 import com.capstone.warehousesvc.repositories.ProductRepository;
 import com.capstone.warehousesvc.repositories.SupplierRepository;
 import com.capstone.warehousesvc.repositories.TransactionRepository;
-import com.capstone.warehousesvc.security.AuthUser;
 import com.capstone.warehousesvc.services.TransactionService;
 import com.capstone.warehousesvc.specification.TransactionFilter;
 import lombok.RequiredArgsConstructor;
@@ -48,18 +47,18 @@ public class TransactionServiceImpl implements TransactionService {
      * Helper method to get current user information from security context
      * @return Object array with userId at index 0 and username at index 1
      */
-    private Object[] getCurrentUserInfo() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
-            if (authentication.getPrincipal() instanceof AuthUser authUser) {
-                return new Object[]{String.valueOf(authUser.getId()), authUser.getName()};
-            } else {
-                // For cases where we might have a different principal type
-                return new Object[]{"0", authentication.getName()};
-            }
-        }
-        return new Object[]{"0", "system"};
-    }
+//    private Object[] getCurrentUserInfo() {
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        if (authentication != null && authentication.isAuthenticated()) {
+//            if (authentication.getPrincipal() instanceof AuthUser authUser) {
+//                return new Object[]{String.valueOf(authUser.getId()), authUser.getName()};
+//            } else {
+//                // For cases where we might have a different principal type
+//                return new Object[]{"0", authentication.getName()};
+//            }
+//        }
+//        return new Object[]{"0", "system"};
+//    }
 
     @Override
     public Response purchase(TransactionRequest transactionRequest) {
@@ -77,9 +76,9 @@ public class TransactionServiceImpl implements TransactionService {
                 .orElseThrow(() -> new NotFoundException("Supplier Not Found"));
 
         // Get user info from security context
-        Object[] userInfo = getCurrentUserInfo();
-        String userId = (String) userInfo[0];
-        String username = (String) userInfo[1];
+//        Object[] userInfo = getCurrentUserInfo();
+//        String userId = (String) userInfo[0];
+//        String username = (String) userInfo[1];
 
         //update the stock quantity and re-save
         product.setStockQuantity(product.getStockQuantity() + quantity);
@@ -90,8 +89,8 @@ public class TransactionServiceImpl implements TransactionService {
                 .transactionType(TransactionType.PURCHASE)
                 .status(TransactionStatus.COMPLETED)
                 .product(product)
-                .userId(userId)
-                .username(username)
+//                .userId(userId)
+//                .username(username)
                 .supplier(supplier)
                 .totalProducts(quantity)
                 .totalPrice(product.getPrice().multiply(BigDecimal.valueOf(quantity)))
@@ -117,9 +116,9 @@ public class TransactionServiceImpl implements TransactionService {
                 .orElseThrow(() -> new NotFoundException("Product Not Found"));
 
         // Get user info from security context
-        Object[] userInfo = getCurrentUserInfo();
-        String userId = (String) userInfo[0];
-        String username = (String) userInfo[1];
+//        Object[] userInfo = getCurrentUserInfo();
+//        String userId = (String) userInfo[0];
+//        String username = (String) userInfo[1];
 
         //update the stock quantity and re-save
         product.setStockQuantity(product.getStockQuantity() - quantity);
@@ -131,8 +130,8 @@ public class TransactionServiceImpl implements TransactionService {
                 .transactionType(TransactionType.SALE)
                 .status(TransactionStatus.COMPLETED)
                 .product(product)
-                .userId(userId)
-                .username(username)
+//                .userId(userId)
+//                .username(username)
                 .totalProducts(quantity)
                 .totalPrice(product.getPrice().multiply(BigDecimal.valueOf(quantity)))
                 .description(transactionRequest.getDescription())
@@ -161,9 +160,9 @@ public class TransactionServiceImpl implements TransactionService {
                 .orElseThrow(() -> new NotFoundException("Product Not Found"));
 
         // Get user info from security context
-        Object[] userInfo = getCurrentUserInfo();
-        String userId = (String) userInfo[0];
-        String username = (String) userInfo[1];
+//        Object[] userInfo = getCurrentUserInfo();
+//        String userId = (String) userInfo[0];
+//        String username = (String) userInfo[1];
 
         //update the stock quantity and re-save
         product.setStockQuantity(product.getStockQuantity() - quantity);
@@ -175,8 +174,8 @@ public class TransactionServiceImpl implements TransactionService {
                 .transactionType(TransactionType.RETURN_TO_SUPPLIER)
                 .status(TransactionStatus.PROCESSING)
                 .product(product)
-                .userId(userId)
-                .username(username)
+//                .userId(userId)
+//                .username(username)
                 .totalProducts(quantity)
                 .totalPrice(BigDecimal.ZERO)
                 .description(transactionRequest.getDescription())
