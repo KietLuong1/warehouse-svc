@@ -1,6 +1,6 @@
 package com.capstone.warehousesvc.services;
 
-import com.capstone.warehousesvc.dtos.*;
+import com.capstone.warehousesvc.dtos.dashboard.*;
 
 import java.time.LocalDateTime;
 import java.util.List;

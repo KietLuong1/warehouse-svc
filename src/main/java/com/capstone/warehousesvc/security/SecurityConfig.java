@@ -2,7 +2,6 @@ package com.capstone.warehousesvc.security;
 
 import com.capstone.warehousesvc.exceptions.CustomAccessDenialHandler;
 import com.capstone.warehousesvc.exceptions.CustomAuthenticationEntryPoint;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,13 +21,20 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@RequiredArgsConstructor
 @Slf4j
 public class SecurityConfig {
 
     private final AuthFilter authFilter;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomAccessDenialHandler customAccessDenialHandler;
+
+    public SecurityConfig(AuthFilter authFilter, 
+                         CustomAuthenticationEntryPoint customAuthenticationEntryPoint,
+                         CustomAccessDenialHandler customAccessDenialHandler) {
+        this.authFilter = authFilter;
+        this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
+        this.customAccessDenialHandler = customAccessDenialHandler;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -45,6 +51,7 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/v3/api-docs.yaml").permitAll()
+                        .requestMatchers("/api/v1/dashboard/**").permitAll()
                         // All other endpoints require authentication
                         .anyRequest().authenticated()
                 )

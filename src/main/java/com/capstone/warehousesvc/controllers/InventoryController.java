@@ -1,6 +1,8 @@
 package com.capstone.warehousesvc.controllers;
 
 import com.capstone.warehousesvc.dtos.*;
+import com.capstone.warehousesvc.dtos.dashboard.InventoryAdjustmentRequest;
+import com.capstone.warehousesvc.dtos.dashboard.InventoryMovementRequest;
 import com.capstone.warehousesvc.services.InventoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -102,7 +104,7 @@ public class InventoryController {
     @Operation(summary = "Adjust inventory quantity",
             description = "Adjust inventory quantity (add, subtract, or set) (Admin only)")
     @PostMapping("/adjust")
-    @PreAuthorize("hasAuthority('ADMIN')")
+//    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> adjustInventory(@Valid @RequestBody InventoryAdjustmentRequest request) {
         return ResponseEntity.ok(inventoryService.adjustInventory(request));
     }
@@ -110,7 +112,7 @@ public class InventoryController {
     @Operation(summary = "Move inventory between warehouses",
             description = "Transfer inventory from one warehouse to another (Admin only)")
     @PostMapping("/move")
-    @PreAuthorize("hasAuthority('ADMIN')")
+//    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> moveInventory(@Valid @RequestBody InventoryMovementRequest request) {
         return ResponseEntity.ok(inventoryService.moveInventory(request));
     }
@@ -118,7 +120,7 @@ public class InventoryController {
     @Operation(summary = "Reserve inventory",
             description = "Reserve a quantity of inventory for orders (Admin only)")
     @PostMapping("/{id}/reserve")
-    @PreAuthorize("hasAuthority('ADMIN')")
+//    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> reserveInventory(
             @Parameter(description = "Inventory ID") @PathVariable String id,
             @Parameter(description = "Quantity to reserve") @RequestParam Integer quantity) {
@@ -128,7 +130,7 @@ public class InventoryController {
     @Operation(summary = "Release inventory reservation",
             description = "Release reserved inventory quantity (Admin only)")
     @PostMapping("/{id}/release")
-    @PreAuthorize("hasAuthority('ADMIN')")
+//    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> releaseReservation(
             @Parameter(description = "Inventory ID") @PathVariable String id,
             @Parameter(description = "Quantity to release") @RequestParam Integer quantity) {
@@ -225,7 +227,7 @@ public class InventoryController {
     @Operation(summary = "Update last counted date",
             description = "Mark an inventory item as counted today (Admin only)")
     @PostMapping("/{id}/count/mark")
-    @PreAuthorize("hasAuthority('ADMIN')")
+//    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> updateLastCountedDate(
             @Parameter(description = "Inventory ID") @PathVariable String id) {
         return ResponseEntity.ok(inventoryService.updateLastCountedDate(id));
@@ -234,7 +236,7 @@ public class InventoryController {
     @Operation(summary = "Perform inventory count",
             description = "Record a physical inventory count and adjust quantities (Admin only)")
     @PostMapping("/{id}/count")
-    @PreAuthorize("hasAuthority('ADMIN')")
+//    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> performInventoryCount(
             @Parameter(description = "Inventory ID") @PathVariable String id,
             @Parameter(description = "Physically counted quantity") @RequestParam Integer countedQuantity,

@@ -1,8 +1,8 @@
 package com.capstone.warehousesvc.services;
 
 import com.capstone.warehousesvc.dtos.*;
-
-import java.util.List;
+import com.capstone.warehousesvc.dtos.dashboard.InventoryAdjustmentRequest;
+import com.capstone.warehousesvc.dtos.dashboard.InventoryMovementRequest;
 
 public interface InventoryService {
 

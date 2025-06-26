@@ -1,6 +1,9 @@
 package com.capstone.warehousesvc.services.impl;
 
 import com.capstone.warehousesvc.dtos.*;
+import com.capstone.warehousesvc.dtos.dashboard.InventoryAdjustmentRequest;
+import com.capstone.warehousesvc.dtos.dashboard.InventoryMovementRequest;
+import com.capstone.warehousesvc.dtos.dashboard.InventorySummary;
 import com.capstone.warehousesvc.exceptions.NotFoundException;
 import com.capstone.warehousesvc.models.Inventory;
 import com.capstone.warehousesvc.models.Product;

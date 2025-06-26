@@ -1,6 +1,6 @@
 package com.capstone.warehousesvc.services.impl;
 
-import com.capstone.warehousesvc.dtos.InventoryAdjustmentRequest;
+import com.capstone.warehousesvc.dtos.dashboard.InventoryAdjustmentRequest;
 import com.capstone.warehousesvc.dtos.Response;
 import com.capstone.warehousesvc.dtos.TransactionRequest;
 import com.capstone.warehousesvc.models.InventoryHistory;
