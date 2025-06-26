@@ -9,7 +9,7 @@ public interface SupplierService {
 
     Response updateSupplier(String id, SupplierDTO supplierDTO);
 
-    Response getAllSupplier();
+    Response getAllSupplier(int page, int size, String keyword);
 
     Response getSupplierById(String id);
 

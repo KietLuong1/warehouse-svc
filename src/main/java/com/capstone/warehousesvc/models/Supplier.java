@@ -7,6 +7,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,4 +29,5 @@ public class Supplier {
     private String contactInfo;
 
     private String address;
+    private final LocalDateTime createdAt = LocalDateTime.now();
 }

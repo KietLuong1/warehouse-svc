@@ -38,7 +38,7 @@ public interface InventoryRepository extends JpaRepository<Inventory, String>, J
     List<Inventory> findByQuantityOnHand(Integer quantity);
 
     // Find items expiring soon
-    @Query("SELECT i FROM Inventory i WHERE i.expiryDate IS NOT NULL AND i.expiryDate <= :expiryDate")
+    @Query("SELECT i FROM Inventory i WHERE i.expiryDate <= :expiryDate AND i.expiryDate IS NOT NULL")
     List<Inventory> findItemsExpiringSoon(@Param("expiryDate") LocalDateTime expiryDate);
 
     // Find by location code
@@ -47,46 +47,98 @@ public interface InventoryRepository extends JpaRepository<Inventory, String>, J
     // Find by batch number
     List<Inventory> findByBatchNumber(String batchNumber);
 
-    // Search inventory by product name or SKU
-    @Query("SELECT i FROM Inventory i JOIN i.product p WHERE " +
-           "LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "LOWER(p.sku) LIKE LOWER(CONCAT('%', :keyword, '%'))")
-    Page<Inventory> searchInventory(@Param("keyword") String keyword, Pageable pageable);
-
-    // Get total inventory value
-    @Query("SELECT COALESCE(SUM(i.quantityOnHand * i.unitCost), 0) FROM Inventory i WHERE i.unitCost IS NOT NULL")
+    // Analytics queries
+    @Query("SELECT SUM(i.quantityOnHand * i.unitCost) FROM Inventory i WHERE i.unitCost IS NOT NULL")
     BigDecimal getTotalInventoryValue();
 
-//    // Get inventory value by warehouse
-//    @Query("SELECT COALESCE(SUM(i.quantityOnHand * i.unitCost), 0) FROM Inventory i WHERE i.warehouseId = :warehouseId AND i.unitCost IS NOT NULL")
-//    BigDecimal getInventoryValueByWarehouse(@Param("warehouseId") String warehouseId);
-
-    // Get top inventory items by value
-    @Query("SELECT i FROM Inventory i WHERE i.unitCost IS NOT NULL ORDER BY (i.quantityOnHand * i.unitCost) DESC")
-    List<Inventory> findTopInventoryItemsByValue();
-
-    // Count low stock items
     @Query("SELECT COUNT(i) FROM Inventory i WHERE i.quantityOnHand <= i.reorderLevel AND i.reorderLevel IS NOT NULL")
     Long countLowStockItems();
 
-    // Count overstock items
     @Query("SELECT COUNT(i) FROM Inventory i WHERE i.quantityOnHand > i.maxStockLevel AND i.maxStockLevel IS NOT NULL")
     Long countOverstockItems();
 
-    // Count out of stock items
     Long countByQuantityOnHand(Integer quantity);
 
-    // Count items expiring soon
-    @Query("SELECT COUNT(i) FROM Inventory i WHERE i.expiryDate IS NOT NULL AND i.expiryDate <= :expiryDate")
+    @Query("SELECT COUNT(i) FROM Inventory i WHERE i.expiryDate <= :expiryDate AND i.expiryDate IS NOT NULL")
     Long countItemsExpiringSoon(@Param("expiryDate") LocalDateTime expiryDate);
 
-    // Find items that need counting (haven't been counted recently)
-    @Query("SELECT i FROM Inventory i WHERE i.lastCountedDate IS NULL OR i.lastCountedDate < :cutoffDate")
+    // Check if product-warehouse combination exists
+    Boolean existsByProductIdAndWarehouseId(String productId, String warehouseId);
+
+    // Search functionality
+    @Query("SELECT i FROM Inventory i WHERE " +
+           "(LOWER(i.product.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(i.product.sku) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+           "ORDER BY i.lastUpdated DESC")
+    Page<Inventory> searchInventory(@Param("keyword") String keyword, Pageable pageable);
+
+    // Soft delete methods
+    @Query("SELECT i FROM Inventory i WHERE i.isDeleted = false OR i.isDeleted IS NULL")
+    List<Inventory> findAllActive();
+
+    @Query("SELECT i FROM Inventory i WHERE i.isDeleted = false OR i.isDeleted IS NULL")
+    Page<Inventory> findAllActive(Pageable pageable);
+
+    @Query("SELECT i FROM Inventory i WHERE i.id = :id AND (i.isDeleted = false OR i.isDeleted IS NULL)")
+    Optional<Inventory> findActiveById(@Param("id") String id);
+
+    @Query("SELECT i FROM Inventory i WHERE i.product.id = :productId AND i.warehouse.id = :warehouseId AND (i.isDeleted = false OR i.isDeleted IS NULL)")
+    Optional<Inventory> findActiveByProductIdAndWarehouseId(@Param("productId") String productId, @Param("warehouseId") String warehouseId);
+
+    @Query("SELECT i FROM Inventory i WHERE i.product.id = :productId AND (i.isDeleted = false OR i.isDeleted IS NULL)")
+    List<Inventory> findActiveByProductId(@Param("productId") String productId);
+
+    @Query("SELECT i FROM Inventory i WHERE i.warehouse.id = :warehouseId AND (i.isDeleted = false OR i.isDeleted IS NULL)")
+    List<Inventory> findActiveByWarehouseId(@Param("warehouseId") String warehouseId);
+
+    @Query("SELECT i FROM Inventory i WHERE i.quantityOnHand <= i.reorderLevel AND i.reorderLevel IS NOT NULL AND (i.isDeleted = false OR i.isDeleted IS NULL)")
+    List<Inventory> findActiveLowStockItems();
+
+    @Query("SELECT i FROM Inventory i WHERE i.quantityOnHand > i.maxStockLevel AND i.maxStockLevel IS NOT NULL AND (i.isDeleted = false OR i.isDeleted IS NULL)")
+    List<Inventory> findActiveOverstockItems();
+
+    @Query("SELECT i FROM Inventory i WHERE i.quantityOnHand = :quantity AND (i.isDeleted = false OR i.isDeleted IS NULL)")
+    List<Inventory> findActiveByQuantityOnHand(@Param("quantity") Integer quantity);
+
+    @Query("SELECT i FROM Inventory i WHERE i.expiryDate <= :expiryDate AND i.expiryDate IS NOT NULL AND (i.isDeleted = false OR i.isDeleted IS NULL)")
+    List<Inventory> findActiveItemsExpiringSoon(@Param("expiryDate") LocalDateTime expiryDate);
+
+    @Query("SELECT i FROM Inventory i WHERE i.locationCode = :locationCode AND (i.isDeleted = false OR i.isDeleted IS NULL)")
+    List<Inventory> findActiveByLocationCode(@Param("locationCode") String locationCode);
+
+    @Query("SELECT i FROM Inventory i WHERE i.batchNumber = :batchNumber AND (i.isDeleted = false OR i.isDeleted IS NULL)")
+    List<Inventory> findActiveByBatchNumber(@Param("batchNumber") String batchNumber);
+
+    @Query("SELECT i FROM Inventory i WHERE " +
+           "(LOWER(i.product.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(i.product.sku) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+           "AND (i.isDeleted = false OR i.isDeleted IS NULL) " +
+           "ORDER BY i.lastUpdated DESC")
+    Page<Inventory> searchActiveInventory(@Param("keyword") String keyword, Pageable pageable);
+
+    // Soft delete analytics
+    @Query("SELECT SUM(i.quantityOnHand * i.unitCost) FROM Inventory i WHERE i.unitCost IS NOT NULL AND (i.isDeleted = false OR i.isDeleted IS NULL)")
+    BigDecimal getActiveTotalInventoryValue();
+
+    @Query("SELECT COUNT(i) FROM Inventory i WHERE i.quantityOnHand <= i.reorderLevel AND i.reorderLevel IS NOT NULL AND (i.isDeleted = false OR i.isDeleted IS NULL)")
+    Long countActiveLowStockItems();
+
+    @Query("SELECT COUNT(i) FROM Inventory i WHERE i.quantityOnHand > i.maxStockLevel AND i.maxStockLevel IS NOT NULL AND (i.isDeleted = false OR i.isDeleted IS NULL)")
+    Long countActiveOverstockItems();
+
+    @Query("SELECT COUNT(i) FROM Inventory i WHERE i.quantityOnHand = :quantity AND (i.isDeleted = false OR i.isDeleted IS NULL)")
+    Long countActiveByQuantityOnHand(@Param("quantity") Integer quantity);
+
+    @Query("SELECT COUNT(i) FROM Inventory i WHERE i.expiryDate <= :expiryDate AND i.expiryDate IS NOT NULL AND (i.isDeleted = false OR i.isDeleted IS NULL)")
+    Long countActiveItemsExpiringSoon(@Param("expiryDate") LocalDateTime expiryDate);
+
+    @Query("SELECT COUNT(i) FROM Inventory i WHERE (i.isDeleted = false OR i.isDeleted IS NULL)")
+    Long countActive();
+
+    // Additional methods for business logic
+    @Query("SELECT i FROM Inventory i WHERE (i.isDeleted = false OR i.isDeleted IS NULL) ORDER BY (i.quantityOnHand * i.unitCost) DESC")
+    List<Inventory> findTopInventoryItemsByValue(Pageable pageable);
+
+    @Query("SELECT i FROM Inventory i WHERE (i.lastCountedDate IS NULL OR i.lastCountedDate <= :cutoffDate) AND (i.isDeleted = false OR i.isDeleted IS NULL)")
     List<Inventory> findItemsNeedingCount(@Param("cutoffDate") LocalDateTime cutoffDate);
-
-    // Get inventory by product and warehouse with batch
-    List<Inventory> findByProductIdAndWarehouseIdAndBatchNumber(String productId, String warehouseId, String batchNumber);
-
-    // Check if inventory exists for product and warehouse
-    boolean existsByProductIdAndWarehouseId(String productId, String warehouseId);
 }

@@ -33,9 +33,7 @@ public class WarehouseDTO {
     @Schema(description = "Active status of warehouse", example = "true")
     private Boolean active = true;
 
-    @NotBlank(message = "Create Date is required")
     private LocalDateTime createdAt;
 
-    @NotBlank(message = "Update Date required")
     private LocalDateTime updatedAt;
 } 

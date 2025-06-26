@@ -56,17 +56,10 @@ public class WarehouseController {
     
     @Operation(summary = "Get all warehouses")
     @GetMapping
-    public ResponseEntity<Response> getAllWarehouses() {
-        Map<String, Object> data = new HashMap<>();
-        data.put("warehouses", warehouseService.getAllWarehouses());
-        
-        Response response = Response.builder()
-                .status(HttpStatus.OK.value())
-                .message("Warehouses retrieved successfully")
-                .dataList(data)
-                .build();
-        
-        return ResponseEntity.ok(response);
+    public ResponseEntity<Response> getAllWarehouses(@RequestParam(defaultValue = "1") int page,
+                                                     @RequestParam(defaultValue = "10") int size,
+                                                     @RequestParam(required = false) String keyword) {
+        return ResponseEntity.ok(warehouseService.getAllWarehouses(page, size, keyword));
     }
     
     @Operation(summary = "Get active warehouses")
@@ -87,13 +80,10 @@ public class WarehouseController {
     @Operation(summary = "Get warehouse by ID")
     @GetMapping("/{id}")
     public ResponseEntity<Response> getWarehouse(@PathVariable String id) {
-        Map<String, Object> data = new HashMap<>();
-        data.put("warehouse", warehouseService.getWarehouse(id));
-
         Response response = Response.builder()
                 .status(HttpStatus.OK.value())
                 .message("Warehouse retrieved successfully")
-                .dataList(data)
+                .warehouse(warehouseService.getWarehouse(id))
                 .build();
 
         return ResponseEntity.ok(response);
@@ -104,13 +94,10 @@ public class WarehouseController {
     public ResponseEntity<Response> updateWarehouse(@PathVariable String id, @Valid @RequestBody WarehouseDTO dto) {
         WarehouseDTO updatedWarehouse = warehouseService.updateWarehouse(id, dto);
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("warehouse", updatedWarehouse);
-
         Response response = Response.builder()
                 .status(HttpStatus.OK.value())
                 .message("Warehouse updated successfully")
-                .dataList(data)
+                .warehouse(warehouseService.updateWarehouse(id, updatedWarehouse))
                 .build();
 
         return ResponseEntity.ok(response);

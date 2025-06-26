@@ -1,5 +1,8 @@
 package com.capstone.warehousesvc.models;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
@@ -37,6 +40,7 @@ public class Inventory {
 
     @Column(name = "reserved_quantity")
     @Min(value = 0, message = "Reserved quantity cannot be negative")
+    @Builder.Default
     private Integer reservedQuantity = 0;
 
     @Column(name = "reorder_level")
@@ -57,6 +61,8 @@ public class Inventory {
     private String batchNumber;
 
     @Column(name = "expiry_date")
+//    @JsonFormat(pattern = "yyyy-MM-dd" )
+//    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime expiryDate;
 
     @Column(name = "last_counted_date")
@@ -70,6 +76,16 @@ public class Inventory {
 
     @Column(name = "updated_by")
     private String updatedBy; // User ID who last updated
+
+    @Column(name = "is_deleted")
+    @Builder.Default
+    private Boolean isDeleted = false;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    @Column(name = "deleted_by")
+    private String deletedBy;
 
     @PrePersist
     protected void onCreate() {

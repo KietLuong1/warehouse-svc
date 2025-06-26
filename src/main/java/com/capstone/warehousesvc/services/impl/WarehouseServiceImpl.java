@@ -1,16 +1,28 @@
 package com.capstone.warehousesvc.services.impl;
 
+import com.capstone.warehousesvc.dtos.InventoryDTO;
 import com.capstone.warehousesvc.dtos.ProductDTO;
+import com.capstone.warehousesvc.dtos.Response;
 import com.capstone.warehousesvc.dtos.WarehouseDTO;
 import com.capstone.warehousesvc.exceptions.ResourceNotFoundException;
+import com.capstone.warehousesvc.models.Inventory;
 import com.capstone.warehousesvc.models.Product;
 import com.capstone.warehousesvc.models.Warehouse;
 import com.capstone.warehousesvc.repositories.ProductRepository;
 import com.capstone.warehousesvc.repositories.WarehouseRepository;
 import com.capstone.warehousesvc.services.WarehouseService;
+import com.capstone.warehousesvc.specification.InventoryFilter;
+import com.capstone.warehousesvc.specification.ProductFilter;
+import com.capstone.warehousesvc.specification.WarehouseFilter;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,7 +37,6 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public WarehouseDTO createWarehouse(WarehouseDTO warehouseDTO) {
-        // Add your implementation here
         Warehouse warehouse = modelMapper.map(warehouseDTO, Warehouse.class);
         Warehouse savedWarehouse = warehouseRepository.save(warehouse);
         return modelMapper.map(savedWarehouse, WarehouseDTO.class);
@@ -40,12 +51,27 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     @Override
-    public List<WarehouseDTO> getAllWarehouses() {
-        List<Warehouse> warehouses = warehouseRepository.findAll();
+//    @Transactional(readOnly = true)
+    public Response getAllWarehouses(int page, int size, String keyword) {
+        Sort sort = Sort.by("createdAt").descending();
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+        Specification<Warehouse> spec = WarehouseFilter.byKeyword(keyword);
 
-        return warehouses.stream()
+        Page<Warehouse> warehouses = warehouseRepository.findAll(spec, pageable);
+
+        List<WarehouseDTO> warehouseDTOS = warehouses.stream()
                 .map(warehouse -> modelMapper.map(warehouse, WarehouseDTO.class))
                 .collect(Collectors.toList());
+
+        return Response.builder()
+                .pageSize(pageable.getPageSize())
+                .currentPage(page)
+                .totalElements(warehouses.getTotalElements())
+                .totalPages(warehouses.getTotalPages())
+                .message("Success")
+                .data(warehouseDTOS)
+                .status(200)
+                .build();
     }
 
     @Override

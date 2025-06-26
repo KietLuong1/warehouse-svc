@@ -1,17 +1,25 @@
 package com.capstone.warehousesvc.services.impl;
 
 
+import com.capstone.warehousesvc.dtos.ProductDTO;
 import com.capstone.warehousesvc.dtos.Response;
 import com.capstone.warehousesvc.dtos.SupplierDTO;
 import com.capstone.warehousesvc.exceptions.NotFoundException;
+import com.capstone.warehousesvc.models.Product;
 import com.capstone.warehousesvc.models.Supplier;
 import com.capstone.warehousesvc.repositories.SupplierRepository;
 import com.capstone.warehousesvc.services.SupplierService;
+import com.capstone.warehousesvc.specification.ProductFilter;
+import com.capstone.warehousesvc.specification.SupplierFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -57,17 +65,24 @@ public class SupplierServiceImpl implements SupplierService {
     }
 
     @Override
-    public Response getAllSupplier() {
+    public Response getAllSupplier(int page, int size, String keyword) {
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "id"));
+        Specification<Supplier> spec = SupplierFilter.byKeyword(keyword);
+        Page<Supplier> pageResult = supplierRepository.findAll(spec, pageable);
 
-        List<Supplier> suppliers = supplierRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
-
-        List<SupplierDTO> supplierDTOList = modelMapper.map(suppliers, new TypeToken<List<SupplierDTO>>() {
-        }.getType());
+        List<SupplierDTO> suppliers = modelMapper.map(
+                pageResult.getContent(),
+                new TypeToken<List<SupplierDTO>>() {}.getType()
+        );
 
         return Response.builder()
                 .status(200)
+                .currentPage(page)
+                .pageSize(size)
+                .totalElements(pageResult.getTotalElements())
+                .totalPages(pageResult.getTotalPages())
                 .message("success")
-                .suppliers(supplierDTOList)
+                .suppliers(suppliers)
                 .build();
     }
 

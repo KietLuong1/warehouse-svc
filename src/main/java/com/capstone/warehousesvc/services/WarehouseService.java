@@ -1,6 +1,7 @@
 package com.capstone.warehousesvc.services;
 
 import com.capstone.warehousesvc.dtos.ProductDTO;
+import com.capstone.warehousesvc.dtos.Response;
 import com.capstone.warehousesvc.dtos.WarehouseDTO;
 
 import java.util.List;
@@ -11,7 +12,7 @@ public interface WarehouseService {
     
     WarehouseDTO getWarehouse(String id);
 
-    List<WarehouseDTO> getAllWarehouses();
+    Response getAllWarehouses(int page, int size, String keyword);
 
     List<WarehouseDTO> getActiveWarehouses();
 

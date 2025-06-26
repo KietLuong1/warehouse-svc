@@ -11,7 +11,6 @@ import com.capstone.warehousesvc.repositories.WarehouseRepository;
 import com.capstone.warehousesvc.security.AuthUser;
 import com.capstone.warehousesvc.services.InventoryService;
 import com.capstone.warehousesvc.specification.InventoryFilter;
-import com.capstone.warehousesvc.specification.ProductFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -27,7 +26,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -149,7 +147,7 @@ public class InventoryServiceImpl implements InventoryService {
     public Response getInventoryById(String id) {
         log.info("Fetching inventory with id: {}", id);
 
-        Inventory inventory = inventoryRepository.findById(id)
+        Inventory inventory = inventoryRepository.findActiveById(id)
                 .orElseThrow(() -> new NotFoundException("Inventory not found"));
 
         InventoryDTO inventoryDTO = mapToInventoryDTO(inventory);
@@ -165,7 +163,7 @@ public class InventoryServiceImpl implements InventoryService {
     @Transactional(readOnly = true)
     public Response getAllInventory(int page, int size, String keyword, String warehouseId) {
         log.info("Fetching all inventory");
-        Sort sort = Sort.by("lastUpdated").descending();
+        Sort sort = Sort.by("id").descending();
         Pageable pageable = PageRequest.of(page - 1, size, sort);
         Specification<Inventory> spec = InventoryFilter.byKeyword(keyword, warehouseId);
 
@@ -187,13 +185,22 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     public Response deleteInventory(String id) {
-        log.info("Deleting inventory with id: {}", id);
+        log.info("Soft deleting inventory with id: {}", id);
 
-        if (!inventoryRepository.existsById(id)) {
-            throw new NotFoundException("Inventory not found");
+        Inventory inventory = inventoryRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Inventory not found"));
+
+        if (inventory.getIsDeleted()) {
+            throw new IllegalArgumentException("Inventory is already deleted");
         }
 
-        inventoryRepository.deleteById(id);
+        // Perform soft delete
+        inventory.setIsDeleted(true);
+        inventory.setDeletedAt(LocalDateTime.now());
+        inventory.setDeletedBy(getCurrentUserId());
+        inventory.setUpdatedBy(getCurrentUserId());
+        
+        inventoryRepository.save(inventory);
 
         return Response.builder()
                 .status(200)
@@ -207,7 +214,7 @@ public class InventoryServiceImpl implements InventoryService {
         log.info("Searching inventory with term: {}", keyword);
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Inventory> inventories = inventoryRepository
-                .searchInventory(keyword, pageable);
+                .searchActiveInventory(keyword, pageable);
 
         if (inventories.isEmpty()) {
             throw new NotFoundException("Inventories Not Found");
@@ -234,7 +241,7 @@ public class InventoryServiceImpl implements InventoryService {
     public Response getInventoryByProduct(String productId) {
         log.info("Fetching inventory for product: {}", productId);
 
-        List<Inventory> inventories = inventoryRepository.findByProductId(productId);
+        List<Inventory> inventories = inventoryRepository.findActiveByProductId(productId);
 
         List<InventoryDTO> inventoryDTOs = inventories.stream()
                 .map(this::mapToInventoryDTO)
@@ -252,7 +259,7 @@ public class InventoryServiceImpl implements InventoryService {
     public Response getInventoryByWarehouse(String warehouseId) {
         log.info("Fetching inventory for warehouse: {}", warehouseId);
 
-        List<Inventory> inventories = inventoryRepository.findByWarehouseId(warehouseId);
+        List<Inventory> inventories = inventoryRepository.findActiveByWarehouseId(warehouseId);
 
         List<InventoryDTO> inventoryDTOs = inventories.stream()
                 .map(this::mapToInventoryDTO)
@@ -270,7 +277,7 @@ public class InventoryServiceImpl implements InventoryService {
     public Response getInventoryByProductAndWarehouse(String productId, String warehouseId) {
         log.info("Fetching inventory for product {} in warehouse {}", productId, warehouseId);
 
-        Inventory inventory = inventoryRepository.findByProductIdAndWarehouseId(productId, warehouseId)
+        Inventory inventory = inventoryRepository.findActiveByProductIdAndWarehouseId(productId, warehouseId)
                 .orElseThrow(() -> new NotFoundException("Inventory not found"));
 
         InventoryDTO inventoryDTO = mapToInventoryDTO(inventory);
@@ -440,12 +447,12 @@ public class InventoryServiceImpl implements InventoryService {
         log.info("Generating inventory summary");
 
         InventorySummary summary = InventorySummary.builder()
-                .totalInventoryItems(inventoryRepository.count())
-                .totalInventoryValue(inventoryRepository.getTotalInventoryValue())
-                .lowStockCount(inventoryRepository.countLowStockItems())
-                .overstockCount(inventoryRepository.countOverstockItems())
-                .outOfStockCount(inventoryRepository.countByQuantityOnHand(0))
-                .expiringSoonCount(inventoryRepository.countItemsExpiringSoon(LocalDateTime.now().plusDays(30)))
+                .totalInventoryItems(inventoryRepository.countActive())
+                .totalInventoryValue(inventoryRepository.getActiveTotalInventoryValue())
+                .lowStockCount(inventoryRepository.countActiveLowStockItems())
+                .overstockCount(inventoryRepository.countActiveOverstockItems())
+                .outOfStockCount(inventoryRepository.countActiveByQuantityOnHand(0))
+                .expiringSoonCount(inventoryRepository.countActiveItemsExpiringSoon(LocalDateTime.now().plusDays(30)))
                 .build();
 
         return Response.builder()
@@ -460,7 +467,7 @@ public class InventoryServiceImpl implements InventoryService {
     public Response getLowStockItems() {
         log.info("Fetching low stock items");
 
-        List<Inventory> lowStockItems = inventoryRepository.findLowStockItems();
+        List<Inventory> lowStockItems = inventoryRepository.findActiveLowStockItems();
         List<InventoryDTO> inventoryDTOs = lowStockItems.stream()
                 .map(this::mapToInventoryDTO)
                 .collect(Collectors.toList());
@@ -477,7 +484,7 @@ public class InventoryServiceImpl implements InventoryService {
     public Response getOverstockItems() {
         log.info("Fetching overstock items");
 
-        List<Inventory> overstockItems = inventoryRepository.findOverstockItems();
+        List<Inventory> overstockItems = inventoryRepository.findActiveOverstockItems();
         List<InventoryDTO> inventoryDTOs = overstockItems.stream()
                 .map(this::mapToInventoryDTO)
                 .collect(Collectors.toList());
@@ -494,7 +501,7 @@ public class InventoryServiceImpl implements InventoryService {
     public Response getOutOfStockItems() {
         log.info("Fetching out of stock items");
 
-        List<Inventory> outOfStockItems = inventoryRepository.findByQuantityOnHand(0);
+        List<Inventory> outOfStockItems = inventoryRepository.findActiveByQuantityOnHand(0);
         List<InventoryDTO> inventoryDTOs = outOfStockItems.stream()
                 .map(this::mapToInventoryDTO)
                 .collect(Collectors.toList());
@@ -512,7 +519,7 @@ public class InventoryServiceImpl implements InventoryService {
         log.info("Fetching items expiring in {} days", daysAhead);
 
         LocalDateTime expiryDate = LocalDateTime.now().plusDays(daysAhead);
-        List<Inventory> expiringItems = inventoryRepository.findItemsExpiringSoon(expiryDate);
+        List<Inventory> expiringItems = inventoryRepository.findActiveItemsExpiringSoon(expiryDate);
         List<InventoryDTO> inventoryDTOs = expiringItems.stream()
                 .map(this::mapToInventoryDTO)
                 .collect(Collectors.toList());
@@ -530,10 +537,9 @@ public class InventoryServiceImpl implements InventoryService {
         log.info("Fetching top {} inventory items by value", limit);
 
         Pageable pageable = PageRequest.of(0, limit);
-        List<Inventory> topItems = inventoryRepository.findTopInventoryItemsByValue();
+        List<Inventory> topItems = inventoryRepository.findTopInventoryItemsByValue(pageable);
 
         List<InventoryDTO> inventoryDTOs = topItems.stream()
-                .limit(limit)
                 .map(this::mapToInventoryDTO)
                 .collect(Collectors.toList());
 
@@ -549,7 +555,7 @@ public class InventoryServiceImpl implements InventoryService {
     public Response getInventoryByLocation(String locationCode) {
         log.info("Fetching inventory for location: {}", locationCode);
 
-        List<Inventory> inventories = inventoryRepository.findByLocationCode(locationCode);
+        List<Inventory> inventories = inventoryRepository.findActiveByLocationCode(locationCode);
         List<InventoryDTO> inventoryDTOs = inventories.stream()
                 .map(this::mapToInventoryDTO)
                 .collect(Collectors.toList());
@@ -566,7 +572,7 @@ public class InventoryServiceImpl implements InventoryService {
     public Response getInventoryByBatch(String batchNumber) {
         log.info("Fetching inventory for batch: {}", batchNumber);
 
-        List<Inventory> inventories = inventoryRepository.findByBatchNumber(batchNumber);
+        List<Inventory> inventories = inventoryRepository.findActiveByBatchNumber(batchNumber);
         List<InventoryDTO> inventoryDTOs = inventories.stream()
                 .map(this::mapToInventoryDTO)
                 .collect(Collectors.toList());
